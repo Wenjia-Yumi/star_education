@@ -3,23 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STAR Education</title>
+    <title>STAR DIGITAL 跨境电商产业学院</title>
     <meta name="description" content="STAR Education Project">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['system-ui', '-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                dark: '#0F2C59',
+                accent: '#F39F5A',
+                light: '#EFF6FF',
+                bg: '#F8FAFC'
+              }
+            }
+          }
+        }
+      }
+    </script>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>STAR Education</h1>
-            <p>基础原生开发环境已就绪</p>
-        </header>
-        <main>
-            <!-- 内容区域 -->
-        </main>
+<body class="bg-brand-bg text-slate-800 font-sans h-screen flex flex-col overflow-hidden">
+  
+  <!-- 全局顶栏 -->
+  <header class="bg-brand-dark text-white py-4 px-6 shadow-md z-20 relative flex-shrink-0">
+    <div class="w-full flex justify-between items-center print-flex">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide">STAR DIGITAL 跨境电商产业学院 <span class="no-print">· 控制台</span><span class="hidden print-only print:inline"></span></h1>
+        <p class="text-slate-300 text-sm mt-1 no-print">为校企合作量身定制建设方案</p>
+      </div>
+      <div class="text-right">
+        <div class="text-sm text-slate-300" id="current-date"></div>
+      </div>
     </div>
-    <script src="./js/main.js"></script>
+  </header>
+
+  <!-- 下半部分容器 -->
+  <div class="flex-1 flex min-h-0">
+    <!-- 左侧边栏 -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col no-print z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)] relative">
+      <nav class="p-4 flex-1 space-y-2 overflow-y-auto" id="sidebar-nav">
+        <a href="demo.html" target="content_frame" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-light text-brand-dark font-medium border border-brand-dark/10 shadow-sm transition-all hover:shadow-md">
+          <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          产教融合课程体系
+        </a>
+        <a href="products.html" target="content_frame" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-brand-light/50 text-slate-600 hover:text-brand-dark font-medium transition-all border border-transparent">
+          <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          产品清单
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 右侧主体内容 (Iframe) -->
+    <div class="flex-1 min-w-0 bg-brand-bg relative h-full">
+      <iframe name="content_frame" src="demo.html" class="w-full h-full border-none"></iframe>
+    </div>
+  </div>
+
+  <script src="./js/main.js"></script>
+  <script>
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN');
+    
+    // 简单的导航状态切换逻辑
+    const links = document.querySelectorAll('#sidebar-nav a');
+    links.forEach(link => {
+      link.addEventListener('click', function() {
+        links.forEach(l => {
+          l.classList.remove('bg-brand-light', 'text-brand-dark', 'border-brand-dark/10', 'shadow-sm');
+          l.classList.add('text-slate-600', 'hover:bg-brand-light/50', 'hover:text-brand-dark', 'border-transparent');
+          l.querySelector('svg').classList.remove('text-brand-accent');
+          l.querySelector('svg').classList.add('text-slate-400');
+        });
+        this.classList.remove('text-slate-600', 'hover:bg-brand-light/50', 'hover:text-brand-dark', 'border-transparent');
+        this.classList.add('bg-brand-light', 'text-brand-dark', 'border-brand-dark/10', 'shadow-sm');
+        this.querySelector('svg').classList.remove('text-slate-400');
+        this.querySelector('svg').classList.add('text-brand-accent');
+      });
+    });
+  </script>
 </body>
 </html>

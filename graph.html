@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Graph | STAR DIGITAL SOLUTION</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-center: #05060d;
+      --bg-edge: #0a0e1f;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --panel-bg: rgba(15, 23, 42, 0.85);
+      --panel-border: rgba(51, 65, 85, 0.5);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, var(--bg-center) 0%, var(--bg-edge) 100%);
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    /* Top Bar */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .title-area h1 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .title-area h2 {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(8px);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .legend-item:hover { opacity: 0.8; }
+    .legend-item.dimmed { opacity: 0.3; }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* Side Panel */
+    #side-panel {
+      position: absolute;
+      top: 0;
+      right: -360px;
+      width: 320px;
+      height: 100vh;
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border-left: 1px solid var(--panel-border);
+      padding: 2rem 1.5rem;
+      box-sizing: border-box;
+      z-index: 20;
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    #side-panel.open {
+      right: 0;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      cursor: pointer;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .close-btn:hover { color: white; }
+
+    #sp-stage-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      border: 1px solid currentColor;
+    }
+
+    #sp-course {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #sp-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      line-height: 1.2;
+    }
+
+    #sp-desc {
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+    }
+
+    .list-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 0.25rem;
+    }
+
+    .rel-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .rel-item {
+      font-size: 0.8125rem;
+      padding: 0.5rem;
+      margin-bottom: 0.25rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .rel-item:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateX(4px);
+    }
+    .rel-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* Bottom Controls */
+    .controls {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .reset-btn {
+      pointer-events: auto;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--panel-border);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
+      margin-bottom: 0.5rem;
+    }
+    .reset-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .instruction {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Tooltip */
+    #tooltip {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--panel-border);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      pointer-events: none;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.1s;
+      z-index: 30;
+      transform: translate(-50%, -120%);
+      white-space: nowrap;
+    }
+    #tooltip.visible { opacity: 1; }
+    #tooltip-name { font-weight: 700; color: white; margin-bottom: 0.2rem; }
+    #tooltip-course { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+
+    /* Floating Node Label */
+    #floating-label {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transform: translate(15px, -15px); /* offset from mouse/node */
+      z-index: 25;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    #floating-label.visible { opacity: 1; }
+
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  <div id="floating-label"></div>
+
+  <header>
+    <div class="title-area">
+      <h1>STAR DIGITAL × Industry College</h1>
+      <h2>Cross-Border E-Commerce Knowledge Graph</h2>
+    </div>
+    <div class="legend" id="legend">
+      <!-- Generated via JS -->
+    </div>
+  </header>
+
+  <div class="controls">
+    <button class="reset-btn" id="reset-btn">Reset View</button>
+    <div class="instruction">Drag to rotate · Click a node to explore connections</div>
+  </div>
+
+  <div id="side-panel">
+    <div class="close-btn" id="close-btn">×</div>
+    <div id="sp-stage-badge">Stage</div>
+    <div id="sp-course">Course Name</div>
+    <h3 id="sp-name">Node Name</h3>
+    <p id="sp-desc">Description goes here...</p>
+    
+    <div class="list-title">Prerequisites</div>
+    <ul class="rel-list" id="sp-pre"></ul>
+    
+    <div class="list-title">Leads To</div>
+    <ul class="rel-list" id="sp-post"></ul>
+  </div>
+
+  <div id="tooltip">
+    <div id="tooltip-name">Node</div>
+    <div id="tooltip-course">Course</div>
+  </div>
+
+  <script>
+    // ==========================================
+    // === Data Definition ===
+    // ==========================================
+    
+    const STAGES = {
+      1: { name: "Stage 1: Foundation Knowledge", color: "#60a5fa", radius: 4.0 }, // Cool blue
+      2: { name: "Stage 2: Major-Specific Core", color: "#fbbf24", radius: 4.4 }, // Will override per branch
+      3: { name: "Stage 3: Project Practicum", color: "#c084fc", radius: 4.8 }, // Purple
+      4: { name: "Stage 4: Production Practice", color: "#d946ef", radius: 5.2 }, // Magenta
+      5: { name: "Stage 5: Advanced Role Skills", color: "#facc15", radius: 5.6 }, // Gold
+      6: { name: "Stage 6: Future Trend Skills", color: "#2dd4bf", radius: 6.0 }  // Cyan
+    };
+
+    const BRANCH_COLORS = {
+      ops: "#fbbf24", // Amber
+      marketing: "#fb7185", // Coral pink
+      data: "#2dd4bf" // Teal green
+    };
+
+    const RAW_COURSES = [
+      // STAGE 1
+      { stage: 1, id: 'c_intro', name: 'Intro to Cross-Border E-Com', chapters: ['Industry Overview', 'Global E-Commerce Landscape', 'Major Platforms Comparison', 'Business Models (B2B/B2C/DTC)', 'Legal & Compliance Basics'] },
+      { stage: 1, id: 'c_eng', name: 'Business English Comm.', chapters: ['Business Email Writing', 'Negotiation Vocabulary', 'Product Description Writing', 'Customer Service English', 'Cross-Cultural Comm'] },
+      { stage: 1, id: 'c_trade', name: 'Intl Trade Practice', chapters: ['Incoterms 2020', 'Letters of Credit', 'Export Documentation', 'HS Codes', 'Trade Settlement'] },
+      { stage: 1, id: 'c_tools', name: 'Digital Tools & Office', chapters: ['Excel for E-Commerce', 'Collaborative Tools', 'Basic Data Entry', 'File Management', 'Productivity Workflows'] },
+      { stage: 1, id: 'c_psych', name: 'Consumer Psych Fundamentals', chapters: ['Buying Motivation', 'Decision Journey', 'Cognitive Biases', 'Cultural Preferences', 'Trust Building'] },
+      { stage: 1, id: 'c_etiq', name: 'Cross-Cultural Etiquette', chapters: ['Regional Norms (NA/EU/SEA)', 'Holiday & Gifting Customs', 'Taboos', 'Communication Styles'] },
+
+      // STAGE 2 - Ops
+      { stage: 2, branch: 'ops', id: 'c_amz', name: 'Amazon/Shopee Ops', chapters: ['Account Registration', 'Listing Optimization', 'A+ Content', 'FBA Logistics', 'Performance Metrics', 'Account Health'] },
+      { stage: 2, branch: 'ops', id: 'c_log', name: 'Logistics & Customs', chapters: ['Shipping Methods', 'Customs Declaration', 'Tariffs Calculation', 'Returns Handling', 'Last-Mile Delivery'] },
+      { stage: 2, branch: 'ops', id: 'c_wh', name: 'Overseas Warehouse Mgt', chapters: ['Inventory Forecasting', 'SKU Management', 'Warehouse Selection', 'Replenishment Planning'] },
+      { stage: 2, branch: 'ops', id: 'c_pay', name: 'Intl Payment & Risk', chapters: ['Payment Gateways', 'Chargeback Prevention', 'Fraud Detection', 'Currency Hedging'] },
+
+      // STAGE 2 - Marketing
+      { stage: 2, branch: 'marketing', id: 'c_vid', name: 'Short-Video Production', chapters: ['Scripting', 'Shooting Basics', 'Editing Workflow', 'Hook Design', 'Platform-Specific Formats'] },
+      { stage: 2, branch: 'marketing', id: 'c_live', name: 'Livestream Selling Ops', chapters: ['Studio Setup', 'Host Training', 'Script Structuring', 'Real-Time Interaction', 'Conversion Tactics'] },
+      { stage: 2, branch: 'marketing', id: 'c_soc', name: 'Social Media Traffic', chapters: ['Paid Ads (Meta/TikTok)', 'Organic Growth', 'SEO', 'Content Calendar'] },
+      { stage: 2, branch: 'marketing', id: 'c_kol', name: 'Influencer & KOL Collab', chapters: ['Influencer Sourcing', 'Brief Writing', 'Contract Terms', 'ROI Measurement'] },
+
+      // STAGE 2 - Data
+      { stage: 2, branch: 'data', id: 'c_eda', name: 'E-Com Data Analytics', chapters: ['KPI Frameworks', 'Funnel Analysis', 'Cohort Analysis', 'Attribution Models'] },
+      { stage: 2, branch: 'data', id: 'c_bi', name: 'BI Tools & Dashboarding', chapters: ['Power BI/Tableau Basics', 'Dashboard Design', 'Data Storytelling'] },
+      { stage: 2, branch: 'data', id: 'c_ab', name: 'Consumer Insight & A/B', chapters: ['Experiment Design', 'Statistical Significance', 'Segmentation', 'Persona Building'] },
+      { stage: 2, branch: 'data', id: 'c_fc', name: 'Sales Forecast & Inv. Opt.', chapters: ['Time-Series Basics', 'Demand Planning', 'Safety Stock', 'Reorder Points'] },
+
+      // STAGE 3
+      { stage: 3, id: 'c_p1', name: 'STAR Live Storefront Project', chapters: ['Real Account Setup', 'Listing Batch', 'Ad Campaign', 'Weekly Review Cycles'] },
+      { stage: 3, id: 'c_p2', name: 'STAR TikTok Studio Project', chapters: ['Full Livestream Production', 'Audience Engagement', 'Sales-Target Sprints'] },
+      { stage: 3, id: 'c_p3', name: 'STAR Data Decision Project', chapters: ['Real-Data Dashboards', 'Business Reporting', 'Decision Recommendations'] },
+
+      // STAGE 4
+      { stage: 4, id: 'c_ind1', name: 'Real-Account Store Ops', chapters: ['Daily Operations', 'Customer Inquiries', 'Order Processing'] },
+      { stage: 4, id: 'c_ind2', name: 'Peak-Season War Room', chapters: ['Pre-Campaign Planning', 'Traffic Budgeting', 'Real-Time Monitoring', 'Post-Mortem Analysis'] },
+      { stage: 4, id: 'c_ind3', name: 'Overseas CS Center', chapters: ['Ticket Triage', 'Conflict Resolution', 'VIP Support'] },
+      { stage: 4, id: 'c_ind4', name: 'End-to-End Fulfillment', chapters: ['Pick & Pack', 'Carrier Handoff', 'Exception Handling'] },
+      { stage: 4, id: 'c_ind5', name: 'Capstone Store Launch', chapters: ['Market Selection', 'Product Sourcing', 'Store Buildout', 'Launch Marketing'] },
+
+      // STAGE 5
+      { stage: 5, id: 'c_r1', name: 'Intermediate Roles', chapters: ['Category Manager Skills', 'Brand Operations Manager', 'Performance Marketing Lead', 'Livestream Studio Director'] },
+      { stage: 5, id: 'c_r2', name: 'Senior Roles', chapters: ['Cross-Border Ops Director', 'Global Supply Chain Architect', 'Brand Going-Global Strategist', 'Data Science Lead'] },
+
+      // STAGE 6
+      { stage: 6, id: 'c_f1', name: 'Future Trend Skills', chapters: ['Generative AI for Content', 'AI Personalization & Recs', 'AI Agents for Ops', 'Emerging Market Entry', 'Web3 & Crypto Payments', 'Sustainable Commerce', 'Global Compliance & Tax'] }
+    ];
+
+    const NODES = [];
+    const EDGES = [];
+    const NODE_MAP = {};
+
+    let nodeIdCounter = 0;
+
+    // 1. Generate Nodes & Internal Edges
+    RAW_COURSES.forEach(course => {
+      let color = STAGES[course.stage].color;
+      if (course.stage === 2 && course.branch) {
+        color = BRANCH_COLORS[course.branch];
+      }
+
+      let prevNodeId = null;
+
+      course.chapters.forEach((chapterName, idx) => {
+        const nId = 'n_' + nodeIdCounter++;
+        const node = {
+          id: nId,
+          name: chapterName,
+          course: course.name,
+          stage: course.stage,
+          color: color,
+          desc: `Essential module in ${course.name} focusing on practical ${chapterName.toLowerCase()} execution for cross-border e-commerce professionals.`,
+          radius: STAGES[course.stage].radius + (Math.random() * 0.2 - 0.1) // slight noise
+        };
+        NODES.push(node);
+        NODE_MAP[nId] = node;
+
+        // Internal course edge (sequential)
+        if (prevNodeId) {
+          EDGES.push({ source: prevNodeId, target: nId, type: 'internal' });
+        }
+        prevNodeId = nId;
+      });
+    });
+
+    // 2. Generate Cross-Course / Cross-Stage Edges
+    // Helper to get random nodes by stage
+    const getNodesByStage = (stage) => NODES.filter(n => n.stage === stage);
+    const getRandomNodes = (arr, count) => {
+      const shuffled = arr.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    // Stage 1 -> Stage 2
+    const s1Nodes = getNodesByStage(1);
+    const s2Nodes = getNodesByStage(2);
+    s2Nodes.forEach(s2n => {
+      // Connect each Stage 2 node to 1-2 Stage 1 nodes
+      const parents = getRandomNodes(s1Nodes, Math.floor(Math.random() * 2) + 1);
+      parents.forEach(p => EDGES.push({ source: p.id, target: s2n.id, type: 'progression' }));
+    });
+
+    // Stage 2 -> Stage 3
+    const s3Nodes = getNodesByStage(3);
+    s3Nodes.forEach(s3n => {
+      // Connect to 3-5 Stage 2 nodes
+      const parents = getRandomNodes(s2Nodes, Math.floor(Math.random() * 3) + 3);
+      parents.forEach(p => EDGES.push({ source: p.id, target: s3n.id, type: 'progression' }));
+    });
+
+    // Stage 3 -> Stage 4
+    const s4Nodes = getNodesByStage(4);
+    s4Nodes.forEach(s4n => {
+      const parents = getRandomNodes(s3Nodes, Math.floor(Math.random() * 2) + 1);
+      parents.forEach(p => EDGES.push({ source: p.id, target: s4n.id, type: 'progression' }));
+    });
+
+    // Stage 4 -> Stage 5
+    const s5Nodes = getNodesByStage(5);
+    s5Nodes.forEach(s5n => {
+      const parents = getRandomNodes(s4Nodes, Math.floor(Math.random() * 2) + 1);
+      parents.forEach(p => EDGES.push({ source: p.id, target: s5n.id, type: 'progression' }));
+    });
+
+    // Stage 5 -> Stage 6
+    const s6Nodes = getNodesByStage(6);
+    s6Nodes.forEach(s6n => {
+      const parents = getRandomNodes(s5Nodes, Math.floor(Math.random() * 2) + 1);
+      parents.forEach(p => EDGES.push({ source: p.id, target: s6n.id, type: 'progression' }));
+    });
+
+    // A few random cross-branch skip connections to make it "neural"
+    for(let i=0; i<60; i++) {
+      const src = NODES[Math.floor(Math.random() * NODES.length)];
+      const targets = NODES.filter(n => n.stage > src.stage && n.stage <= src.stage + 2);
+      if(targets.length > 0) {
+        const tgt = targets[Math.floor(Math.random() * targets.length)];
+        // Prevent duplicate
+        if(!EDGES.find(e => e.source === src.id && e.target === tgt.id)) {
+           EDGES.push({ source: src.id, target: tgt.id, type: 'cross' });
+        }
+      }
+    }
+
+    // Build adjacency lists for quick lookups
+    NODES.forEach(n => { n.pre = []; n.post = []; });
+    EDGES.forEach(e => {
+      NODE_MAP[e.source].post.push(e.target);
+      NODE_MAP[e.target].pre.push(e.source);
+    });
+
+    // ==========================================
+    // === UI Setup ===
+    // ==========================================
+    const legendEl = document.getElementById('legend');
+    Object.keys(STAGES).forEach(key => {
+      const st = STAGES[key];
+      const div = document.createElement('div');
+      div.className = 'legend-item';
+      div.dataset.stage = key;
+      div.innerHTML = `<div class="legend-color" style="background: ${st.color}; color: ${st.color}"></div> <span>${st.name}</span>`;
+      div.addEventListener('click', () => filterStage(key, div));
+      legendEl.appendChild(div);
+    });
+
+    let activeFilter = null;
+    function filterStage(stageId, el) {
+      if (activeFilter === stageId) {
+        // disable filter
+        activeFilter = null;
+        document.querySelectorAll('.legend-item').forEach(item => item.classList.remove('dimmed'));
+        resetNodeOpacities();
+      } else {
+        activeFilter = stageId;
+        document.querySelectorAll('.legend-item').forEach(item => {
+          if(item.dataset.stage !== stageId) item.classList.add('dimmed');
+          else item.classList.remove('dimmed');
+        });
+        filterNodesByStage(parseInt(stageId));
+      }
+      if(selectedNodeId) selectNode(null); // clear selection
+    }
+
+    // ==========================================
+    // === Three.js Scene Setup ===
+    // ==========================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 14;
+
+    const scene = new THREE.Scene();
+    
+    // Graph Group (rotatable)
+    const graphGroup = new THREE.Group();
+    scene.add(graphGroup);
+
+    // Particles/Stars
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = [];
+    for(let i=0; i<300; i++) {
+      const r = 20 + Math.random() * 20;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+      starPos.push(
+        r * Math.sin(phi) * Math.cos(theta),
+        r * Math.sin(phi) * Math.sin(theta),
+        r * Math.cos(phi)
+      );
+    }
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05, transparent: true, opacity: 0.5 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    // Distribute Nodes via Fibonacci Sphere
+    const phi = Math.PI * (3 - Math.sqrt(5));
+    NODES.forEach((node, i) => {
+      const y = 1 - (i / (NODES.length - 1)) * 2;
+      const radiusAtY = Math.sqrt(1 - y * y);
+      const theta = phi * i;
+
+      // Base unit sphere position
+      const bx = Math.cos(theta) * radiusAtY;
+      const by = y;
+      const bz = Math.sin(theta) * radiusAtY;
+
+      // Apply specific radius
+      node.pos = new THREE.Vector3(bx, by, bz).normalize().multiplyScalar(node.radius);
+
+      // Create Mesh
+      const size = node.stage >= 5 ? 0.12 : 0.08;
+      const geo = new THREE.SphereGeometry(size, 16, 16);
+      const mat = new THREE.MeshBasicMaterial({ 
+        color: new THREE.Color(node.color),
+        transparent: true,
+        opacity: 0.9
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(node.pos);
+      mesh.userData = { id: node.id };
+      
+      node.mesh = mesh;
+      graphGroup.add(mesh);
+    });
+
+    // Create Edges
+    const edgeMaterialDefault = new THREE.LineBasicMaterial({ 
+      color: 0x88ccff, 
+      transparent: true, 
+      opacity: 0.15,
+      depthWrite: false
+    });
+    
+    // We will recreate specific highlighted edges dynamically, but keep default edges in a single geometry for performance
+    const defaultEdgePoints = [];
+    EDGES.forEach(edge => {
+      const p1 = NODE_MAP[edge.source].pos;
+      const p2 = NODE_MAP[edge.target].pos;
+      defaultEdgePoints.push(p1, p2);
+    });
+    const defaultEdgeGeo = new THREE.BufferGeometry().setFromPoints(defaultEdgePoints);
+    const defaultEdgeLines = new THREE.LineSegments(defaultEdgeGeo, edgeMaterialDefault);
+    graphGroup.add(defaultEdgeLines);
+
+    // Highlighted Edges Group
+    const highlightEdgesGroup = new THREE.Group();
+    graphGroup.add(highlightEdgesGroup);
+
+    // Selected Node Breathing Ring
+    const ringGeo = new THREE.RingGeometry(0.1, 0.12, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
+    const breathingRing = new THREE.Mesh(ringGeo, ringMat);
+    breathingRing.visible = false;
+    graphGroup.add(breathingRing);
+
+    // ==========================================
+    // === Interaction Logic ===
+    // ==========================================
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    let dragDistance = 0;
+    let dragStartTime = 0;
+    let lastInteractTime = Date.now();
+
+    let selectedNodeId = null;
+    let hoveredNodeId = null;
+
+    // DOM Elements
+    const tooltip = document.getElementById('tooltip');
+    const ttName = document.getElementById('tooltip-name');
+    const ttCourse = document.getElementById('tooltip-course');
+    const sidePanel = document.getElementById('side-panel');
+    const floatingLabel = document.getElementById('floating-label');
+
+    function updateTooltip(e) {
+      if (hoveredNodeId && !isDragging) {
+        const node = NODE_MAP[hoveredNodeId];
+        ttName.textContent = node.name;
+        ttCourse.textContent = node.course;
+        tooltip.style.left = e.clientX + 'px';
+        tooltip.style.top = e.clientY + 'px';
+        tooltip.classList.add('visible');
+        document.body.style.cursor = 'pointer';
+      } else {
+        tooltip.classList.remove('visible');
+        document.body.style.cursor = isDragging ? 'grabbing' : 'default';
+      }
+    }
+
+    // Curved edge builder
+    function createHighlightEdge(p1, p2, colorHex, isForward) {
+      // Create a gentle arc by lifting the control point outwards
+      const mid = p1.clone().lerp(p2, 0.5);
+      const dist = p1.distanceTo(p2);
+      mid.normalize().multiplyScalar(mid.length() + dist * 0.2); // bulge out
+
+      const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
+      const points = curve.getPoints(20);
+      const geo = new THREE.BufferGeometry().setFromPoints(points);
+      const mat = new THREE.LineBasicMaterial({ 
+        color: colorHex, 
+        transparent: true, 
+        opacity: 0.8,
+        linewidth: 2 
+      });
+      const line = new THREE.Line(geo, mat);
+      
+      // Flowing particle
+      const partGeo = new THREE.SphereGeometry(0.04, 8, 8);
+      const partMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const particle = new THREE.Mesh(partGeo, partMat);
+      
+      highlightEdgesGroup.add(line);
+      highlightEdgesGroup.add(particle);
+
+      return { curve, particle, isForward, progress: Math.random() };
+    }
+
+    let activeParticles = [];
+
+    function selectNode(id) {
+      selectedNodeId = id;
+      
+      // Cleanup previous
+      while(highlightEdgesGroup.children.length > 0){ 
+          const child = highlightEdgesGroup.children[0];
+          highlightEdgesGroup.remove(child);
+          if(child.geometry) child.geometry.dispose();
+          if(child.material) child.material.dispose();
+      }
+      activeParticles = [];
+      breathingRing.visible = false;
+
+      if (!id) {
+        // Deselect
+        sidePanel.classList.remove('open');
+        floatingLabel.classList.remove('visible');
+        resetNodeOpacities();
+        defaultEdgeLines.material.opacity = 0.15;
+        return;
+      }
+
+      lastInteractTime = Date.now();
+      const node = NODE_MAP[id];
+      
+      // Setup breathing ring
+      breathingRing.position.copy(node.pos);
+      breathingRing.lookAt(new THREE.Vector3(0,0,0)); // face outward
+      breathingRing.material.color.set(node.color);
+      breathingRing.visible = true;
+
+      // Identify related nodes
+      const preNodes = new Set(node.pre);
+      const postNodes = new Set(node.post);
+      
+      // Visual dims
+      defaultEdgeLines.material.opacity = 0.01;
+      NODES.forEach(n => {
+        if (n.id === id || preNodes.has(n.id) || postNodes.has(n.id)) {
+          n.mesh.material.opacity = 1.0;
+          n.mesh.scale.setScalar(1.0); // Reset scale, selected will be animated
+        } else {
+          n.mesh.material.opacity = 0.15;
+          n.mesh.scale.setScalar(1.0);
+        }
+      });
+
+      // Build highlighted edges
+      node.pre.forEach(pid => {
+        activeParticles.push(createHighlightEdge(NODE_MAP[pid].pos, node.pos, 0x60a5fa, true)); // blue flowing to node
+      });
+      node.post.forEach(pid => {
+        activeParticles.push(createHighlightEdge(node.pos, NODE_MAP[pid].pos, 0xfacc15, true)); // gold flowing from node
+      });
+
+      // Populate Side Panel
+      document.getElementById('sp-stage-badge').textContent = STAGES[node.stage].name;
+      document.getElementById('sp-stage-badge').style.color = node.color;
+      document.getElementById('sp-course').textContent = node.course;
+      document.getElementById('sp-name').textContent = node.name;
+      document.getElementById('sp-name').style.color = node.color;
+      document.getElementById('sp-desc').textContent = node.desc;
+
+      const preList = document.getElementById('sp-pre');
+      preList.innerHTML = '';
+      if(node.pre.length === 0) preList.innerHTML = '<li style="font-size:0.8rem;color:#64748b;">None</li>';
+      node.pre.forEach(pid => {
+        const pn = NODE_MAP[pid];
+        const li = document.createElement('li');
+        li.className = 'rel-item';
+        li.innerHTML = `<div class="rel-dot" style="background:${pn.color}"></div><span>${pn.name}</span>`;
+        li.onclick = () => jumpToNode(pid);
+        preList.appendChild(li);
+      });
+
+      const postList = document.getElementById('sp-post');
+      postList.innerHTML = '';
+      if(node.post.length === 0) postList.innerHTML = '<li style="font-size:0.8rem;color:#64748b;">None</li>';
+      node.post.forEach(pid => {
+        const pn = NODE_MAP[pid];
+        const li = document.createElement('li');
+        li.className = 'rel-item';
+        li.innerHTML = `<div class="rel-dot" style="background:${pn.color}"></div><span>${pn.name}</span>`;
+        li.onclick = () => jumpToNode(pid);
+        postList.appendChild(li);
+      });
+
+      sidePanel.classList.add('open');
+      floatingLabel.textContent = node.name;
+      floatingLabel.style.borderColor = node.color;
+      floatingLabel.style.color = node.color;
+      floatingLabel.classList.add('visible');
+    }
+
+    function jumpToNode(id) {
+      selectNode(id);
+      // Optional: rotate sphere to face node. For simplicity, just select.
+    }
+
+    function resetNodeOpacities() {
+      NODES.forEach(n => {
+        if(activeFilter && n.stage !== parseInt(activeFilter)) {
+          n.mesh.material.opacity = 0.1;
+        } else {
+          n.mesh.material.opacity = 0.9;
+        }
+        n.mesh.scale.setScalar(1.0);
+      });
+    }
+
+    function filterNodesByStage(stageId) {
+      NODES.forEach(n => {
+        n.mesh.material.opacity = (n.stage === stageId) ? 1.0 : 0.1;
+      });
+    }
+
+    document.getElementById('close-btn').addEventListener('click', () => selectNode(null));
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      selectNode(null);
+      activeFilter = null;
+      document.querySelectorAll('.legend-item').forEach(item => item.classList.remove('dimmed'));
+      graphGroup.rotation.set(0,0,0);
+    });
+
+    // Mouse Events
+    window.addEventListener('mousedown', (e) => {
+      if (e.target.tagName !== 'CANVAS') return;
+      isDragging = true;
+      dragDistance = 0;
+      dragStartTime = Date.now();
+      previousMousePosition = { x: e.offsetX, y: e.offsetY };
+      lastInteractTime = Date.now();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      lastInteractTime = Date.now();
+      
+      if (isDragging) {
+        const deltaMove = {
+          x: e.offsetX - previousMousePosition.x,
+          y: e.offsetY - previousMousePosition.y
+        };
+        
+        dragDistance += Math.abs(deltaMove.x) + Math.abs(deltaMove.y);
+
+        graphGroup.rotation.y += deltaMove.x * 0.005;
+        graphGroup.rotation.x += deltaMove.y * 0.005;
+        // clamp X to avoid complete upside-down flipping
+        graphGroup.rotation.x = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, graphGroup.rotation.x));
+
+        previousMousePosition = { x: e.offsetX, y: e.offsetY };
+        document.body.style.cursor = 'grabbing';
+      }
+
+      // Raycast for hover
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      // Intersect only with node meshes
+      const intersects = raycaster.intersectObjects(NODES.map(n => n.mesh));
+      
+      if (intersects.length > 0) {
+        const topId = intersects[0].object.userData.id;
+        if (hoveredNodeId !== topId) {
+          if(hoveredNodeId && hoveredNodeId !== selectedNodeId) NODE_MAP[hoveredNodeId].mesh.scale.setScalar(1.0);
+          hoveredNodeId = topId;
+          if(hoveredNodeId !== selectedNodeId) NODE_MAP[hoveredNodeId].mesh.scale.setScalar(1.15);
+        }
+      } else {
+        if(hoveredNodeId && hoveredNodeId !== selectedNodeId) NODE_MAP[hoveredNodeId].mesh.scale.setScalar(1.0);
+        hoveredNodeId = null;
+      }
+      
+      updateTooltip(e);
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.style.cursor = 'default';
+      
+      const dragDuration = Date.now() - dragStartTime;
+      
+      // Click detection
+      if (dragDistance < 10 && dragDuration < 300) {
+        if (hoveredNodeId) {
+          selectNode(hoveredNodeId);
+        } else {
+          selectNode(null); // Click empty space
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ==========================================
+    // === Animation Loop ===
+    // ==========================================
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+      const dt = clock.getDelta();
+
+      // Auto rotation
+      if (!isDragging && !hoveredNodeId && (Date.now() - lastInteractTime) > 3000) {
+        graphGroup.rotation.y += 0.002;
+        graphGroup.rotation.x += 0.0005;
+      }
+
+      // Stars twinkle
+      const positions = stars.geometry.attributes.position.array;
+      for(let i=1; i<positions.length; i+=3) {
+        positions[i] += Math.sin(time * 2 + i) * 0.002;
+      }
+      stars.geometry.attributes.position.needsUpdate = true;
+
+      // Selected Node Breathing
+      if (selectedNodeId) {
+        const node = NODE_MAP[selectedNodeId];
+        // Scale pulse
+        const s = 1.0 + 0.3 * Math.sin(time * 3);
+        node.mesh.scale.setScalar(s);
+        
+        // Ring animation (0 to 1.5s loop)
+        const tLoop = (time % 1.5) / 1.5;
+        const ringScale = 1 + tLoop * 4; // expands 1x to 5x
+        breathingRing.scale.setScalar(ringScale);
+        breathingRing.material.opacity = 1.0 - tLoop; // fade out
+        
+        // Update floating label position
+        const vector = node.pos.clone();
+        vector.applyMatrix4(graphGroup.matrixWorld);
+        vector.project(camera);
+        
+        const x = (vector.x * .5 + .5) * window.innerWidth;
+        const y = (-(vector.y * .5) + .5) * window.innerHeight;
+        
+        // Only show if it's in front of camera
+        if (vector.z < 1) {
+          floatingLabel.style.left = `${x}px`;
+          floatingLabel.style.top = `${y}px`;
+          floatingLabel.style.opacity = '1';
+        } else {
+          floatingLabel.style.opacity = '0';
+        }
+      } else {
+        floatingLabel.style.opacity = '0';
+      }
+
+      // Flowing particles on active edges
+      activeParticles.forEach(ap => {
+        ap.progress += 0.005; // speed
+        if(ap.progress > 1) ap.progress = 0;
+        
+        // Get position on curve
+        const pos = ap.curve.getPointAt(ap.progress);
+        ap.particle.position.copy(pos);
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+  </script>
+</body>
+</html>
