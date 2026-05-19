@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAR DIGITAL 跨境电商产业学院 · 方案配置</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['system-ui', '-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              dark: '#0F2C59',
+              accent: '#F39F5A',
+              light: '#EFF6FF',
+              bg: '#F8FAFC'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 基础过渡动画 */
+    .transition-all-300 {
+      transition: all 0.3s ease-in-out;
+    }
+    
+    /* 展开详情的动画 */
+    .details-content {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
+    }
+    .details-content.expanded {
+      max-height: 500px;
+      opacity: 1;
+      margin-top: 1rem;
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1; 
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8; 
+    }
+
+    /* 隐藏外采提示（仅打印显示） */
+    .print-external-note { display: none; }
+    
+    /* 隐藏数字动画辅助类 */
+    .number-roll {
+      transition: color 0.3s ease;
+    }
+    .number-roll-active {
+      color: #ea580c; /* text-orange-600 */
+      transform: scale(1.05);
+    }
+
+    /* 打印样式优化 */
+    @media print {
+      body {
+        background-color: white !important;
+        color: black !important;
+        font-size: 12pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-flex {
+        display: flex !important;
+      }
+      .print-grid {
+        display: grid !important;
+      }
+      #app-container {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .details-content {
+        max-height: none !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+        margin-top: 0.5rem !important;
+        display: block !important;
+      }
+      .item-card {
+        page-break-inside: avoid;
+        border: 1px solid #e2e8f0 !important;
+        margin-bottom: 1rem !important;
+        background: white !important;
+        box-shadow: none !important;
+      }
+      .print-external-note {
+        display: block;
+        color: #64748b;
+        font-size: 0.9em;
+        margin-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 1rem;
+      }
+      /* 打印时强行显示序号 */
+      .print-serial::before {
+        content: attr(data-serial) ". ";
+        font-weight: bold;
+      }
+    }
+
+    /* Toast 提示 */
+    #toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #334155;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #toast.show {
+      opacity: 1;
+    }
+
+    /* 移动端抽屉动画 */
+    #mobile-drawer {
+      transform: translateY(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    #mobile-drawer.open {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-slate-800 font-sans min-h-screen flex flex-col">
+
+  <div id="toast">至少需要保留 1 门课程作为方案基础</div>
+
+  <header class="bg-brand-dark text-white py-4 px-6 shadow-md z-10 relative">
+    <div class="max-w-7xl mx-auto flex justify-between items-center print-flex">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide">STAR DIGITAL 跨境电商产业学院 <span class="no-print">· 方案配置</span><span class="hidden print-only print:inline">建设方案</span></h1>
+        <p class="text-slate-300 text-sm mt-1 no-print">为校企合作量身定制建设方案</p>
+      </div>
+      <div class="text-right">
+        <div class="text-sm text-slate-300" id="current-date"></div>
+        <div class="hidden print-only text-sm text-slate-300 mt-1">方案接收方：___________________</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col xl:flex-row gap-6 relative" id="app-container">
+    
+    <div class="w-full xl:w-[70%] flex flex-col gap-6 no-print">
+      
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div class="flex justify-between items-end mb-4">
+          <h2 class="text-lg font-bold text-brand-dark flex items-center">
+            <svg class="w-5 h-5 mr-2 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            推荐方案
+          </h2>
+          <span class="text-sm text-slate-500">点击应用，仍可微调</span>
+        </div>
+        <div class="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory" id="presets-container">
+          </div>
+      </section>
+
+      <section id="groups-container" class="flex flex-col gap-8 pb-20 xl:pb-0">
+        </section>
+
+    </div>
+
+    <div class="xl:w-[30%] no-print z-40 relative">
+      <div id="summary-panel" class="bg-white xl:rounded-xl shadow-lg xl:shadow-sm border-t xl:border border-slate-200 p-5 xl:sticky xl:top-6 flex flex-col fixed bottom-0 left-0 right-0 xl:static transform translate-y-full xl:translate-y-0 transition-transform duration-300 max-h-[85vh] xl:max-h-none overflow-y-auto z-50">
+        
+        <div class="flex justify-between items-center xl:hidden mb-4 border-b pb-3">
+          <h3 class="font-bold text-lg">方案明细</h3>
+          <button id="close-drawer-btn" class="p-2 text-slate-500 hover:text-slate-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-sm text-slate-500 mb-1">方案总价</div>
+          <div class="text-3xl font-bold text-brand-accent font-mono inline-block number-roll transition-all duration-300" id="total-price">¥0</div>
+        </div>
+
+        <hr class="border-slate-100 mb-4">
+
+        <div class="mb-4">
+          <div class="text-sm text-slate-500 mb-1">当前方案</div>
+          <div class="font-bold text-brand-dark" id="current-preset-name">自定义方案</div>
+        </div>
+
+        <hr class="border-slate-100 mb-4">
+
+        <div class="mb-6">
+          <div class="font-bold text-slate-800 mb-3">已选明细</div>
+          <div class="space-y-2 text-sm" id="summary-details">
+            </div>
+        </div>
+
+        <hr class="border-slate-100 mb-4">
+
+        <div class="mb-6 flex-1">
+          <div class="font-bold text-slate-800 mb-3">您将获得</div>
+          <ul class="space-y-2 text-sm text-slate-600" id="deliverables-list">
+            </ul>
+        </div>
+
+        <button onclick="window.print()" class="w-full bg-brand-dark hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          导出方案 PDF
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-trigger" class="xl:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] p-4 flex justify-between items-center z-40">
+      <div>
+        <div class="text-xs text-slate-500 mb-0.5 truncate max-w-[200px]" id="mobile-preset-name"></div>
+        <div class="text-xl font-bold text-brand-accent" id="mobile-total-price">¥0</div>
+      </div>
+      <button id="open-drawer-btn" class="bg-brand-dark text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center">
+        查看明细 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+      </button>
+    </div>
+
+    <div class="hidden print-only w-full">
+      <div id="print-content" class="mb-12"></div>
+      
+      <div class="mt-12 text-sm text-slate-600 leading-relaxed border-t-2 border-brand-dark pt-6">
+        <h3 class="font-bold text-lg text-brand-dark mb-4">项目规划关键补充说明</h3>
+        <ol class="list-decimal pl-5 space-y-2">
+          <li>本方案报价为基于当前市场环境与 STAR DIGITAL 标准交付模型核算的基准指导价，具体实施细节与最终商务条款需经双方进一步洽谈并以最终签订的正式合同为准。</li>
+          <li>方案中涉及的硬件设施、物理空间改造及专线网络等实施条件，需由校方提供符合标准的基础物理环境，相关配合事项将在实施前进行实地勘测确认。</li>
+          <li>软件系统与平台的本地化部署需校方提供相应的服务器资源或云端基础设施，具体配置要求将在项目启动会上输出详细说明。</li>
+          <li>驻场人员及导师的交通、住宿等差旅费用原则上按校企双方协商标准执行；海外实训及国际化挂牌项目受所在国政策及汇率波动影响，保留依实际情况调整的权利。</li>
+        </ol>
+        <div id="print-external-note-container" class="print-external-note">
+          </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="drawer-overlay" class="fixed inset-0 bg-black/50 z-40 hidden xl:hidden opacity-0 transition-opacity"></div>
+
+  <script>
+    // ==========================================
+    // 四、数据层
+    // ==========================================
+    const ITEMS = [
+      // 课程类：序号 1（基础课程 4 门）
+      { id: "course_1_1", serial: 1, group: "course", courseTier: "basic", name: "电子商务基础概论", price: 120000, unit: "门", description: "深度开发的数字化基础课程，涵盖跨境电商行业认知、平台规则、运营基础逻辑。", deliverables: ["4K 广播级课节教学视频", "体系化课程 PDF + 双师授课讲义", "项目化实操手册 + SOP 工具模板", "课时 ≥ 24 学时，含考核解锁机制"] },
+      { id: "course_1_2", serial: 1, group: "course", courseTier: "basic", name: "电子商务职业素养", price: 120000, unit: "门", description: "面向新职业的职业素养与合规意识训练，涵盖跨境电商职业道德、平台合规、客户沟通礼仪。", deliverables: ["4K 广播级课节教学视频", "体系化课程 PDF + 双师授课讲义", "项目化实操手册 + SOP 工具模板", "课时 ≥ 24 学时，含考核解锁机制"] },
+      { id: "course_1_3", serial: 1, group: "course", courseTier: "basic", name: "电子商务短视频制作师", price: 120000, unit: "门", description: "短视频从拍摄、剪辑到爆款脚本的全流程实战课，配套企业真实物料库。", deliverables: ["4K 广播级课节教学视频", "体系化课程 PDF + 双师授课讲义", "项目化实操手册 + SOP 工具模板", "课时 ≥ 24 学时，含考核解锁机制"] },
+      { id: "course_1_4", serial: 1, group: "course", courseTier: "basic", name: "电子商务短视频营销师", price: 120000, unit: "门", description: "短视频投放、爆款逻辑、矩阵账号运营的进阶营销课。", deliverables: ["4K 广播级课节教学视频", "体系化课程 PDF + 双师授课讲义", "项目化实操手册 + SOP 工具模板", "课时 ≥ 24 学时，含考核解锁机制"] },
+      // 课程类：序号 2（高阶课程 5 门）
+      { id: "course_2_1", serial: 2, group: "course", courseTier: "advanced", name: "电子商务店铺运营师", price: 120000, unit: "门", description: "多维数据选品算法解析、店铺全盘运营决策。", deliverables: ["≥ 24 学时高阶实战课程", "商业实战全景案例库（含东南亚 / 美区爆款）", "最新 AIGC 工具指令集（Prompt 库）", "全套实操手册"] },
+      { id: "course_2_2", serial: 2, group: "course", courseTier: "advanced", name: "电子商务广告营销推广师", price: 120000, unit: "门", description: "基于 ROI 的投流与出价策略、多平台广告矩阵搭建。", deliverables: ["≥ 24 学时高阶实战课程", "商业实战全景案例库（含东南亚 / 美区爆款）", "最新 AIGC 工具指令集（Prompt 库）", "全套实操手册"] },
+      { id: "course_2_3", serial: 2, group: "course", courseTier: "advanced", name: "电子商务主播达人营销师", price: 120000, unit: "门", description: "多语种达人（Affiliate）矩阵建联话术与佣金谈判实战。", deliverables: ["≥ 24 学时高阶实战课程", "商业实战全景案例库（含东南亚 / 美区爆款）", "最新 AIGC 工具指令集（Prompt 库）", "全套实操手册"] },
+      { id: "course_2_4", serial: 2, group: "course", courseTier: "advanced", name: "电子商务直播师", price: 120000, unit: "门", description: "大促场次直播场控、互动话术与转化漏斗优化。", deliverables: ["≥ 24 学时高阶实战课程", "商业实战全景案例库（含东南亚 / 美区爆款）", "最新 AIGC 工具指令集（Prompt 库）", "全套实操手册"] },
+      { id: "course_2_5", serial: 2, group: "course", courseTier: "advanced", name: "AI 电商实操特色赋能课", price: 120000, unit: "门", description: "全链路 AIGC（文生图、智能混剪、数字人播报）在商品设计与内容分发中的秒级生成应用。", deliverables: ["≥ 24 学时高阶实战课程", "商业实战全景案例库（含东南亚 / 美区爆款）", "最新 AIGC 工具指令集（Prompt 库）", "全套实操手册"] },
+      // 平台与系统：序号 3、4
+      { id: "platform_3", serial: 3, group: "platform", name: "STAR 教育系统前端 · 千人千面智学舱", price: 100000, unit: "套", isBase: true, description: "本地化混合云部署，与校方教务系统数据双向桥接。学生端 / 教师端 / 督导端 / 管理员端权限分配，集成 RAG 知识库与 AI 智能助教 Leo。", deliverables: ["STAR 前端核心授权 + 本地化部署联调 1 套", "与校方教务学籍系统数据双向桥接", "驻场培训指导 2 场 + 系统使用手册", "并发承载 ≥ 2000 人"] },
+      { id: "platform_4", serial: 4, group: "platform", name: "STAR 教育系统后端 · 考务评估大脑", price: 100000, unit: "套", description: "闭环考试中心、智能动态组卷、NLP 协同阅卷、技术能力图谱、教务调度与档案管理。", deliverables: ["STAR 后端管理 + 考务系统 1 套", "≥ 5000 道高频行业真题库", "AI 智能阅卷算法接口（3 年期）", "定制化大屏数据监控指挥看板 1 套"] },
+      // 实训硬件与软件：序号 5、6
+      { id: "hardware_5", serial: 5, group: "facility", name: "实景直播与数字贸易全链硬件生态仓", price: 550000, unit: "批", optionalExternal: true, description: "符合一线大厂标准的高规格物理实训环境：高性能 PC 集群、4K 广播级直播间、跨境专线网络。", deliverables: ["高性能专业 PC 计算终端 50 台", "全功能主题直播间 3 个（含施工、灯光声学调试）", "跨境专线网络铺设 + 首年宽带", "核心硬件 3 年上门质保"] },
+      { id: "software_6", serial: 6, group: "facility", name: "全球跨境商情态势监测与海外实操软件阵列", price: 200000, unit: "批", optionalExternal: true, description: "防关联浏览器企业级授权 + 跨境数据监测平台 + AIGC 多模态工具 + 沙盒模拟店铺。", deliverables: ["紫鸟浏览器等防关联系统 100 容器并发（3 年）", "数据监测平台企业版账号 10 个（3 年）", "AIGC 商业版工具并发池 50 个", "沙盒全真模拟店铺平台 1 套"] },
+      // 真账实战工作坊：序号 8、9
+      { id: "workshop_8", serial: 8, group: "workshop", name: "创客引产入校与基础内容交付实战工作坊", price: 120000, unit: "年", isBase: true, description: "第一阶段商业接单与质量检验中心。引入企业真实外包订单，配备资深常驻工程师驻场指导。", deliverables: ["稳定企业真实外包项目源（≥ 3 个类目品牌）", "全年驻场实战导师 1 名（3 年以上经验）", "基础内容交付 SOP 质控手册 1 套", "首年产出合格商业素材 ≥ 5000 份，含合规薪酬记录"] },
+      { id: "workshop_9", serial: 9, group: "workshop", name: "全域平台真账操盘与深度商业闭环工作坊", price: 240000, unit: "年", description: "第二阶段高阶商业运营决策中心。下发 TikTok / Shopee / Temu 真实店铺资产，100% 真账实操。", deliverables: ["海外真实商业店铺资产 ≥ 20 个", "有效海外达人建联 ≥ 100 名（产生带货转化）", "全年驻场操盘级运营总监 1 名", "ROI 评估与流量漏斗分析报告库", "真实店铺 GMV 流水 + 学生分佣收益"] },
+      // 师资与国际化：序号 7、10、11
+      { id: "training_7", serial: 7, group: "international", name: "全球化产教双师型人才火种孵化计划", price: 150000, unit: "项", description: "校内训战一体化培训 + 核心教师赴菲律宾马尼拉海外沉浸式进修。", deliverables: ["校内中高阶师资内训 ≥ 50 人次（含双师认证）", "核心教师 ≥ 5 名赴马尼拉海外进修 7 天", "《泛东南亚跨境电商研究与教法创新转化报告》1 份"] },
+      { id: "international_10", serial: 10, group: "international", name: "丝路电商国际职业教育枢纽", price: 350000, unit: "项", tag: "纯挂名 · 不含校内交付物", description: "海外高校对接、海外实训基地挂牌、国际官方技能认证、地方特色产品出海。本项不含校内任何硬件或物品交付。", deliverables: ["≥ 2 所海外高水平职业院校 MOU 签署", "海外目标国挂牌国际联合实训基地 1 个", "海外半官方 / 官方技能认证体系 1 套", "地方特色产业带产品海外上架销售闭环"] },
+      { id: "international_11", serial: 11, group: "international", name: "国内外双循环终身教育中心与 AI 电商赋能行动", price: 180000, unit: "项", description: "面向社会企业与再就业人员的跨境电商进阶培训中心；电商 AI 革命实战营。", deliverables: ["校内挂牌全球数字商务 AI 赋能社会培训中心 1 个", "《AI + 跨境商务全栈企业赋能培训方案》及教材 1 套", "三期内举办社会培训营 ≥ 4 期，覆盖 ≥ 300 人次", "国际权威职业技能证书考培对接"] }
+    ];
+
+    const PRESETS = [
+      { id: "preset_video", name: "视频制作真账项目", tagline: "单门课起步 · 真账接单闭环", items: ["course_1_3", "platform_3", "workshop_8"], expectedPrice: 340000 },
+      { id: "preset_affiliate", name: "达人建联真账项目", tagline: "达人营销切入 · 真账接单闭环", items: ["course_2_2", "platform_3", "workshop_8"], expectedPrice: 340000 },
+      { id: "preset_shop", name: "店铺托管真账项目", tagline: "店铺运营切入 · 真账接单闭环", items: ["course_2_1", "platform_3", "workshop_8"], expectedPrice: 340000 },
+      { id: "preset_full_no_live", name: "全域真账（不含直播）", tagline: "全课程 + 全平台 + 软件 + 双工作坊", items: ["course_1_1", "course_1_2", "course_1_3", "course_1_4", "course_2_1", "course_2_2", "course_2_3", "course_2_4", "course_2_5", "platform_3", "platform_4", "software_6", "workshop_8", "workshop_9"], expectedPrice: 1840000 },
+      { id: "preset_full_with_live", name: "全域真账（含直播）", tagline: "全课程 + 全平台 + 全硬软件 + 双工作坊", items: ["course_1_1", "course_1_2", "course_1_3", "course_1_4", "course_2_1", "course_2_2", "course_2_3", "course_2_4", "course_2_5", "platform_3", "platform_4", "hardware_5", "software_6", "workshop_8", "workshop_9"], expectedPrice: 2390000 }
+    ];
+
+    const BASE_ITEMS = ["platform_3", "workshop_8"];
+    const MIN_COURSES = 1;
+
+    const GROUPS_META = [
+      { id: 'course', title: '课程选择', color: 'bg-blue-500', desc: '每门 ¥120,000，可单独勾选' },
+      { id: 'platform', title: '平台与系统', color: 'bg-purple-500', desc: '数字化基座与智能大脑' },
+      { id: 'facility', title: '实训硬件与软件', color: 'bg-emerald-500', desc: '真实商业生产力环境' },
+      { id: 'workshop', title: '真账实战工作坊', color: 'bg-orange-500', desc: '产教融合运营核心' },
+      { id: 'international', title: '师资与国际化', color: 'bg-amber-700', desc: '出海赋能与终身教育' }
+    ];
+
+    // ==========================================
+    // 状态管理
+    // ==========================================
+    const state = {
+      selectedItems: new Set(),
+      expandedItems: new Set() // 记录展开了详情的项目
+    };
+
+    // 格式化工具
+    const formatMoney = (amount) => new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY', minimumFractionDigits: 0 }).format(amount);
+    
+    // 初始化日期
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN');
+
+    // ==========================================
+    // 核心逻辑
+    // ==========================================
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // 查找项目对象
+    const getItem = (id) => ITEMS.find(i => i.id === id);
+
+    // 计算总价
+    function calculateTotal() {
+      return Array.from(state.selectedItems).reduce((sum, id) => sum + getItem(id).price, 0);
+    }
+
+    // 匹配预设
+    function matchPreset() {
+      const current = Array.from(state.selectedItems).sort().join(',');
+      for (const preset of PRESETS) {
+        const pItems = [...preset.items].sort().join(',');
+        if (current === pItems) return preset;
+      }
+      return null;
+    }
+
+    // 提取聚合交付物
+    function aggregateDeliverables() {
+      let courses = [];
+      let hasBasic = false;
+      let hasAdv = false;
+      let others = [];
+
+      Array.from(state.selectedItems).forEach(id => {
+        const item = getItem(id);
+        if (item.group === 'course') {
+          courses.push(item);
+          if (item.courseTier === 'basic') hasBasic = true;
+          if (item.courseTier === 'advanced') hasAdv = true;
+        } else {
+          others.push(item.deliverables[0]);
+        }
+      });
+
+      let res = [];
+      if (courses.length > 0) {
+        res.push(`✓ ${courses.length} 门数字化课程包（每门 ≥ 24 学时）`);
+        if (hasBasic) res.push("✓ 中英双语职教出海课程标准报告");
+        if (hasAdv) res.push("✓ 商业实战全景案例库（含东南亚 / 美区爆款）");
+      }
+      others.forEach(d => res.push(`✓ ${d}`));
+      return res;
+    }
+
+    // 提取汇总明细
+    function getSummaryDetails() {
+      const groups = { course: { count: 0, sum: 0, name: '课程' }, platform: { count: 0, sum: 0, name: '平台' }, facility: { count: 0, sum: 0, name: '实训' }, workshop: { count: 0, sum: 0, name: '工作坊' }, international: { count: 0, sum: 0, name: '国际化' } };
+      
+      Array.from(state.selectedItems).forEach(id => {
+        const item = getItem(id);
+        groups[item.group].count++;
+        groups[item.group].sum += item.price;
+      });
+
+      return GROUPS_META.map(meta => {
+        const g = groups[meta.id];
+        return { name: g.name, count: g.count, sum: g.sum };
+      });
+    }
+
+    // 操作：切换项目
+    function toggleItem(id) {
+      const item = getItem(id);
+      
+      // 拦截1：底座不可取消
+      if (item.isBase) return;
+
+      // 拦截2：课程最低数量限制
+      if (state.selectedItems.has(id) && item.group === 'course') {
+        const currentCourseCount = Array.from(state.selectedItems).filter(i => getItem(i).group === 'course').length;
+        if (currentCourseCount <= MIN_COURSES) {
+          showToast(`至少需要保留 ${MIN_COURSES} 门课程作为方案基础`);
+          return;
+        }
+      }
+
+      if (state.selectedItems.has(id)) {
+        state.selectedItems.delete(id);
+      } else {
+        state.selectedItems.add(id);
+      }
+      
+      renderAll();
+    }
+
+    // 操作：应用预设
+    function applyPreset(presetId) {
+      const preset = PRESETS.find(p => p.id === presetId);
+      state.selectedItems.clear();
+      preset.items.forEach(id => state.selectedItems.add(id));
+      renderAll();
+    }
+
+    // 操作：展开收起详情
+    function toggleDetails(id) {
+      if (state.expandedItems.has(id)) {
+        state.expandedItems.delete(id);
+      } else {
+        state.expandedItems.add(id);
+      }
+      // 仅重绘该项目的详情部分，避免全局重绘丢失动画，此处为简便依然调用 renderAll，但依靠 CSS 动画
+      renderAll();
+    }
+
+    // ==========================================
+    // 渲染视图
+    // ==========================================
+
+    let lastTotal = -1;
+
+    function renderAll() {
+      const currentPreset = matchPreset();
+      const total = calculateTotal();
+
+      // 1. 渲染快选条
+      const presetsHtml = PRESETS.map(p => {
+        const isSelected = currentPreset && currentPreset.id === p.id;
+        return `
+          <div onclick="applyPreset('${p.id}')" class="min-w-[200px] flex-shrink-0 cursor-pointer border ${isSelected ? 'border-brand-dark bg-brand-light ring-1 ring-brand-dark' : 'border-slate-200 bg-white hover:bg-slate-50'} rounded-lg p-3 transition-colors relative snap-start">
+            ${isSelected ? `<div class="absolute top-2 right-2 text-brand-dark"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></div>` : ''}
+            <div class="font-bold text-slate-800 pr-5">${p.name}</div>
+            <div class="text-brand-accent font-bold mt-1">${formatMoney(p.expectedPrice)}</div>
+            <div class="text-xs text-slate-500 mt-1">${p.tagline}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('presets-container').innerHTML = presetsHtml;
+
+      // 2. 渲染分组列表 (同时生成打印版)
+      let groupsHtml = '';
+      let printHtml = '';
+      let externalTotal = 0;
+
+      GROUPS_META.forEach(meta => {
+        const groupItems = ITEMS.filter(i => i.group === meta.id);
+        if(groupItems.length === 0) return;
+
+        // 桌面版 HTML
+        groupsHtml += `
+          <div class="mb-2 print:mb-6">
+            <div class="flex items-center mb-4">
+              <div class="w-1.5 h-5 ${meta.color} rounded-sm mr-3"></div>
+              <h3 class="text-lg font-bold text-slate-800 mr-3">${meta.title}</h3>
+              <span class="text-sm text-slate-400 no-print">${meta.desc}</span>
+            </div>
+            <div class="space-y-3">
+        `;
+
+        // 打印版 HTML (分组标题)
+        printHtml += `
+          <div class="mb-6 break-inside-avoid">
+            <h3 class="text-lg font-bold text-brand-dark border-b-2 border-slate-200 pb-2 mb-4">${meta.title}</h3>
+            <div class="space-y-4">
+        `;
+
+        groupItems.forEach(item => {
+          const isSelected = state.selectedItems.has(item.id);
+          const isExpanded = state.expandedItems.has(item.id);
+          
+          if (isSelected && item.optionalExternal) {
+            externalTotal += item.price;
+          }
+
+          // Desktop Item Row
+          groupsHtml += `
+            <div class="item-card border rounded-lg p-4 transition-colors ${isSelected ? 'border-brand-dark/20 bg-brand-light/50 border-l-[3px] border-l-brand-dark' : 'border-slate-200 bg-white hover:border-slate-300'}">
+              <div class="flex items-start cursor-pointer" onclick="toggleItem('${item.id}')">
+                <div class="flex-shrink-0 pt-0.5 mr-3">
+                  <div class="w-5 h-5 rounded border ${isSelected ? 'bg-brand-dark border-brand-dark flex items-center justify-center' : 'border-slate-300'} ${item.isBase ? 'opacity-50 cursor-not-allowed' : ''}">
+                    ${isSelected ? `<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                    <div class="font-bold text-slate-800 flex items-center flex-wrap gap-2">
+                      ${item.name}
+                      ${item.isBase ? `<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-normal leading-none" title="闭环底座不可取消">底座 · 不可取消</span>` : ''}
+                      ${item.tag ? `<span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 text-[10px] font-normal leading-none">${item.tag}</span>` : ''}
+                    </div>
+                    <div class="font-mono font-bold text-slate-700 whitespace-nowrap">${formatMoney(item.price)} <span class="text-xs font-normal text-slate-400">/${item.unit}</span></div>
+                  </div>
+                  <div class="text-sm text-slate-500 mt-1 pr-6 truncate sm:whitespace-normal">${item.description}</div>
+                </div>
+                <div class="flex-shrink-0 ml-2 pt-1" onclick="event.stopPropagation(); toggleDetails('${item.id}')">
+                  <button class="text-slate-400 hover:text-brand-dark p-1 rounded transition-transform ${isExpanded ? 'rotate-180' : ''}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="details-content ml-8 ${isExpanded ? 'expanded' : ''}">
+                <div class="bg-white border border-slate-100 rounded p-3 shadow-sm">
+                  <div class="text-xs font-bold text-slate-700 mb-2">您将获得：</div>
+                  <ul class="text-sm text-slate-600 space-y-1">
+                    ${item.deliverables.map(d => `<li class="flex items-start"><span class="text-brand-accent mr-1.5 mt-0.5">•</span> <span>${d}</span></li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Print Item Row (仅包含已选中的)
+          if (isSelected) {
+            printHtml += `
+              <div class="border border-slate-200 rounded p-4 break-inside-avoid">
+                <div class="flex justify-between items-start">
+                  <div class="font-bold text-slate-800 text-base print-serial" data-serial="${item.serial}">${item.name}</div>
+                  <div class="font-mono font-bold">${formatMoney(item.price)}</div>
+                </div>
+                <div class="text-sm text-slate-600 mt-1 mb-2">${item.description}</div>
+                <div class="bg-slate-50 p-2 rounded">
+                  <div class="text-xs font-bold text-slate-700 mb-1">包含内容：</div>
+                  <ul class="text-sm text-slate-600">
+                    ${item.deliverables.map(d => `<li class="ml-4 list-disc">${d}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            `;
+          }
+        });
+        
+        groupsHtml += `</div></div>`;
+        printHtml += `</div></div>`;
+      });
+      document.getElementById('groups-container').innerHTML = groupsHtml;
+      
+      // 更新打印内容区
+      document.getElementById('print-content').innerHTML = printHtml;
+      
+      // 更新打印外采提示
+      const extNoteContainer = document.getElementById('print-external-note-container');
+      if (externalTotal > 0) {
+        extNoteContainer.innerHTML = `备注：方案中包含的硬件与软件设施（序号5、6）可由校方依规自行招标外采，外采参考金额合计为 <span class="font-bold text-brand-dark">${formatMoney(externalTotal)}</span>，此部分可不计入本协议直接交易额。`;
+        extNoteContainer.style.display = 'block';
+      } else {
+        extNoteContainer.style.display = 'none';
+      }
+
+      // 3. 渲染右侧面板与移动端信息
+      const presetName = currentPreset ? currentPreset.name : '自定义方案';
+      document.getElementById('current-preset-name').textContent = presetName;
+      document.getElementById('mobile-preset-name').textContent = `当前方案: ${presetName}`;
+
+      // 数字滚动动画类切换
+      const totalEl = document.getElementById('total-price');
+      const mobileTotalEl = document.getElementById('mobile-total-price');
+      const formattedTotal = formatMoney(total);
+      
+      if (lastTotal !== total) {
+        totalEl.classList.add('number-roll-active');
+        setTimeout(() => totalEl.classList.remove('number-roll-active'), 300);
+        lastTotal = total;
+      }
+      
+      totalEl.textContent = formattedTotal;
+      mobileTotalEl.textContent = formattedTotal;
+
+      // 渲染汇总明细
+      const details = getSummaryDetails();
+      const detailsHtml = details.map(d => `
+        <div class="flex justify-between items-center text-slate-600">
+          <span class="w-16">${d.name}</span>
+          <span class="w-12 text-center text-xs bg-slate-100 rounded px-1 py-0.5">${d.count} 项</span>
+          <span class="w-24 text-right font-mono ${d.sum === 0 ? 'text-slate-300' : 'text-slate-700'}">${d.sum === 0 ? '—' : formatMoney(d.sum)}</span>
+        </div>
+      `).join('');
+      document.getElementById('summary-details').innerHTML = detailsHtml;
+
+      // 渲染交付物
+      const deliverables = aggregateDeliverables();
+      const delivHtml = deliverables.map(d => `<li>${d}</li>`).join('');
+      document.getElementById('deliverables-list').innerHTML = delivHtml;
+    }
+
+    // ==========================================
+    // 移动端交互
+    // ==========================================
+    const drawer = document.getElementById('summary-panel');
+    const overlay = document.getElementById('drawer-overlay');
+    const openBtn = document.getElementById('open-drawer-btn');
+    const closeBtn = document.getElementById('close-drawer-btn');
+
+    function openDrawer() {
+      drawer.classList.remove('translate-y-full');
+      overlay.classList.remove('hidden');
+      setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+      document.body.style.overflow = 'hidden'; // 防止背景滚动
+    }
+
+    function closeDrawer() {
+      drawer.classList.add('translate-y-full');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => overlay.classList.add('hidden'), 300);
+      document.body.style.overflow = '';
+    }
+
+    openBtn.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+
+
+    // ==========================================
+    // 启动初始化
+    // ==========================================
+    window.onload = () => {
+      // 默认选中视频套餐
+      applyPreset('preset_video');
+    };
+
+  </script>
+</body>
+</html>
