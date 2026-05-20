@@ -30,7 +30,7 @@
       overflow: hidden;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       transition: all 0.2s ease;
-      cursor: default;
+      cursor: pointer;
       height: 100%;
       min-height: 70px;
     }
@@ -384,5 +384,56 @@
     </footer>
 
   </div>
+
+  <script>
+    const courseMapping = {
+      'AI-Assisted Listing Opt.': { type: 'chapter', val: 'AI Agents for Ops' },
+      'Brand-Going-Global Strategy': { type: 'chapter', val: 'Brand Going-Global Strategist' },
+      'Compliance & Tax': { type: 'chapter', val: 'Global Compliance & Tax' },
+      'Emerging Market Entry': { type: 'chapter', val: 'Emerging Market Entry' },
+      'Gen-AI for E-Commerce': { type: 'chapter', val: 'Generative AI for Content' },
+      'Amazon/Shopee Ops': { type: 'course', val: 'c_amz' },
+      'Logistics & Customs': { type: 'course', val: 'c_log' },
+      'Overseas Warehouse Mgt': { type: 'course', val: 'c_wh' },
+      'Intl Payment & Risk': { type: 'course', val: 'c_pay' },
+      'Live Storefront Operations': { type: 'course', val: 'c_p1' },
+      'Short-Video Production': { type: 'course', val: 'c_vid' },
+      'Livestream Selling Ops': { type: 'course', val: 'c_live' },
+      'Social Media Traffic': { type: 'course', val: 'c_soc' },
+      'Influencer & KOL Collab': { type: 'course', val: 'c_kol' },
+      'TikTok Livestream Studio': { type: 'course', val: 'c_p2' },
+      'E-Commerce Data Analytics': { type: 'course', val: 'c_eda' },
+      'BI Tools & Dashboarding': { type: 'course', val: 'c_bi' },
+      'Consumer Insight & A/B': { type: 'course', val: 'c_ab' },
+      'Sales Forecast & Inv. Opt.': { type: 'course', val: 'c_fc' },
+      'Cross-Border Data Decision': { type: 'course', val: 'c_p3' },
+      'Real-Account Store Ops': { type: 'course', val: 'c_ind1' },
+      'Peak-Season War Room': { type: 'course', val: 'c_ind2' },
+      'Overseas CS Center': { type: 'course', val: 'c_ind3' },
+      'End-to-End Fulfillment': { type: 'course', val: 'c_ind4' },
+      'Capstone: Store Launch': { type: 'course', val: 'c_ind5' },
+      'Intro to Cross-Border E-Com': { type: 'course', val: 'c_intro' },
+      'Business English': { type: 'course', val: 'c_eng' },
+      'Intl Trade Practice': { type: 'course', val: 'c_trade' },
+      'Digital Tools & Office': { type: 'course', val: 'c_tools' },
+      'Consumer Psychology': { type: 'course', val: 'c_psych' },
+      'Cross-Cultural Etiquette': { type: 'course', val: 'c_etiq' }
+    };
+
+    document.querySelectorAll('.course-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const labelEl = card.querySelector('.course-label');
+        if (labelEl) {
+          const label = labelEl.textContent.trim();
+          const mapping = courseMapping[label];
+          if (mapping) {
+            window.location.href = `graph.html?${mapping.type}=${encodeURIComponent(mapping.val)}`;
+          } else {
+            window.location.href = 'graph.html';
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html>

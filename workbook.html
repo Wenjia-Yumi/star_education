@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Short-Video Content Production | Workbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Manrope:wght@800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-app: #e2e8f0;
+    --book-cover: #0E3A3A;
+    --book-accent: #C9A961;
+    --page-bg: #F8F4EC;
+    --text-main: #1A1A1A;
+  }
+  body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--bg-app); color: var(--text-main); }
+  * { box-sizing: border-box; }
+  
+  /* UI Chrome */
+  .top-bar { position: absolute; top: 0; left: 0; width: 100%; padding: 15px 30px; background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+  .top-bar h1 { margin: 0; font-size: 1.1rem; font-family: 'Manrope', sans-serif; color: var(--book-cover); }
+  .bottom-bar { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 30px; background: #fff; box-shadow: 0 -1px 5px rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 1000; }
+  
+  button { padding: 8px 16px; border: none; border-radius: 6px; background: var(--book-cover); color: #fff; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+  button:hover { background: #165656; }
+  button.outline { background: transparent; border: 1px solid var(--book-cover); color: var(--book-cover); }
+  button.outline:hover { background: rgba(14,58,58,0.1); }
+  
+  .page-indicator { font-weight: 600; font-size: 0.9rem; min-width: 100px; text-align: center; }
+
+  /* 3D Scene */
+  .scene { perspective: 2500px; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding-top: 20px; }
+  .book { position: relative; width: 500px; height: 700px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1); transform: translateX(0); box-shadow: 0 20px 40px rgba(0,0,0,0.2); border-radius: 4px 12px 12px 4px; }
+  .book.open { transform: translateX(250px); box-shadow: none; }
+  .book::after { /* Book drop shadow on desk */ content:''; position:absolute; bottom:-10px; left:0; right:0; height:20px; background:rgba(0,0,0,0.1); filter:blur(10px); transform: translateZ(-10px); }
+
+  /* Leaf & Faces */
+  .leaf { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-origin: left center; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1); border-radius: 2px 10px 10px 2px; }
+  .leaf.turned { transform: rotateY(-180deg); }
+  
+  .face { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; background: var(--page-bg); box-shadow: inset 0 0 30px rgba(0,0,0,0.03), inset 5px 0 15px rgba(0,0,0,0.05); overflow: hidden; padding: 40px 50px; }
+  .face.front { transform: rotateY(0deg); border-radius: 2px 10px 10px 2px; }
+  .face.back { transform: rotateY(180deg); border-radius: 10px 2px 2px 10px; box-shadow: inset 0 0 30px rgba(0,0,0,0.03), inset -5px 0 15px rgba(0,0,0,0.05); }
+
+  /* Sweeping Shadow */
+  .face::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 20%, rgba(0,0,0,0) 100%); background-size: 300% 100%; background-position: 100% 0; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .leaf.turning .face.front::after { animation: sweepFront 0.7s forwards; }
+  .leaf.turning .face.back::after { animation: sweepBack 0.7s forwards; }
+  @keyframes sweepFront { 0% { opacity:0; background-position: 100% 0; } 50% { opacity:1; background-position: 50% 0; } 100% { opacity:0; background-position: 0% 0; } }
+  @keyframes sweepBack { 0% { opacity:0; background-position: 0% 0; } 50% { opacity:1; background-position: 50% 0; } 100% { opacity:0; background-position: 100% 0; } }
+
+  /* Binder Rings */
+  .holes { position: absolute; left: 15px; top: 0; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; pointer-events: none; z-index: 50; }
+  .face.back .holes { left: auto; right: 15px; }
+  .hole { width: 14px; height: 14px; background: #cbd5e1; border-radius: 50%; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); position: relative; }
+  .hole::after { /* Ring visuals drawn over the hole */ content:''; position:absolute; width: 24px; height: 12px; border: 4px solid #94a3b8; border-radius: 10px; left: -9px; top: 1px; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); z-index: 100; clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%); }
+
+  /* Page Content Typography */
+  .page-content { width: 100%; height: 100%; position: relative; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.6; }
+  h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; color: var(--book-cover); margin-top: 0; }
+  .page-number { position: absolute; bottom: 20px; font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+  .face.front .page-number { right: 30px; }
+  .face.back .page-number { left: 30px; }
+  
+  textarea, input[type="text"], .editable { background: rgba(255,255,255,0.5); border: 1px dashed #cbd5e1; border-radius: 4px; padding: 4px 8px; font-family: 'Caveat', cursive; font-size: 1.2rem; color: #1e3a8a; width: 100%; outline: none; resize: none; transition: background 0.2s; }
+  textarea:focus, input[type="text"]:focus, .editable:focus { background: rgba(255,255,255,0.9); border-color: var(--book-accent); }
+  
+  /* Specific Page Styles */
+  .cover-bg { position: absolute; inset: 0; background: var(--book-cover); color: var(--book-accent); padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+  .cover-bg h1 { color: #fff; font-size: 2.5rem; line-height: 1.2; margin-bottom: 10px; }
+  .cover-bg h2 { color: var(--book-accent); font-weight: 400; margin-bottom: 40px; }
+  .cover-bg hr { border-color: var(--book-accent); opacity: 0.5; margin: 30px 0; }
+  .cover-bg .logo { position: absolute; bottom: 40px; right: 40px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.9rem; letter-spacing: 2px; }
+  .cover-bg .course-code { position: absolute; bottom: 40px; left: 40px; font-family: 'Inter', sans-serif; font-size: 0.8rem; opacity: 0.6; }
+  
+  .ch-opener { display: flex; flex-direction: column; justify-content: center; height: 100%; }
+  .ch-opener .ch-num { font-size: 5rem; font-weight: 800; color: var(--book-accent); opacity: 0.3; line-height: 1; margin-bottom: -20px; font-family: 'Manrope', sans-serif;}
+  .ch-opener h2 { font-size: 2rem; line-height: 1.2; margin-bottom: 30px; }
+  .ch-opener .tags { display: flex; gap: 10px; margin-top: 20px; }
+  .ch-opener .tags span { background: #e2e8f0; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-family: 'Inter', sans-serif; font-weight: 600; color: #475569; }
+  
+  .callout { background: rgba(201, 169, 97, 0.1); border-left: 4px solid var(--book-accent); padding: 15px; margin: 20px 0; font-size: 0.9rem; font-style: italic; }
+  .task-box { border: 2px solid var(--book-cover); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+  .checkboxes label { display: block; margin-bottom: 10px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
+  .checkboxes input { margin-right: 10px; accent-color: var(--book-cover); }
+  .q-box { margin-bottom: 20px; }
+  .q-box p { font-weight: 600; margin-bottom: 10px; }
+  .q-box textarea { height: 100px; }
+
+  .toc-list { list-style: none; padding: 0; }
+  .toc-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dotted #cbd5e1; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: color 0.2s;}
+  .toc-list li:hover { color: var(--book-accent); }
+
+  /* Custom Pages */
+  .leaf.note .face { background: #fdfbf7; background-image: repeating-linear-gradient(transparent, transparent 31px, #cbd5e1 31px, #cbd5e1 32px); background-position: 0 40px;}
+  .leaf.note .page-content { padding-top: 10px; }
+  .leaf.note .custom-header { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 20px; }
+  .leaf.note .custom-body { font-family: 'Caveat', cursive; color: #1e3a8a; font-size: 1.4rem; min-height: 400px; outline: none; line-height: 32px;}
+  
+  .leaf.summary .face { background: #eff6ff; }
+  .leaf.summary h4 { font-size: 0.9rem; margin: 15px 0 5px 0; color: #1e40af; }
+  .leaf.summary .custom-body.small { min-height: 100px; font-size: 1.2rem; }
+
+  .leaf.tip { box-shadow: none !important; background: transparent !important; pointer-events: none; }
+  .leaf.tip .face { background: transparent; box-shadow: none; }
+  .leaf.tip .face.front .tip-card { background: #fef08a; width: 300px; min-height: 250px; margin: 80px auto; transform: rotate(-2deg); box-shadow: 2px 4px 15px rgba(0,0,0,0.15); padding: 25px; pointer-events: auto; }
+  .leaf.tip .face.back .tip-card { background: #fef08a; width: 300px; min-height: 250px; margin: 80px auto; transform: rotate(2deg); opacity: 0.9; box-shadow: -2px 4px 15px rgba(0,0,0,0.1); pointer-events: auto;}
+  .tip-card .tag-input { margin-top: 20px; font-size: 0.9rem; background: transparent; border: none; border-bottom: 1px solid #ca8a04; border-radius: 0; color: #ca8a04; }
+
+  .del-btn { position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.3; transition: opacity 0.2s; padding: 5px; pointer-events: auto; z-index: 100;}
+  .del-btn:hover { opacity: 1; background: rgba(255,0,0,0.1); }
+
+  /* Modals */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal { background: #fff; padding: 30px; border-radius: 12px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+  .modal h3 { margin-bottom: 20px; text-align: center; }
+  .modal-btn { display: block; width: 100%; margin-bottom: 10px; padding: 12px; background: #f1f5f9; color: var(--book-cover); border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .modal-btn:hover { background: #e2e8f0; }
+
+  /* Hotspots for turning */
+  .hotspot { position: absolute; top: 0; width: 80px; height: 100%; z-index: 900; cursor: pointer; }
+  .hotspot.left { left: 0; }
+  .hotspot.right { right: 0; }
+
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>STAR DIGITAL | Cross-Border E-Commerce Series</h1>
+  <div style="font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:600; color:#64748b;">
+    Student: <span id="student-name-display">...</span>
+  </div>
+</div>
+
+<div class="scene">
+  <div class="book" id="book">
+    <div class="hotspot left" onclick="turnPrev()"></div>
+    <div class="hotspot right" onclick="turnNext()"></div>
+    <!-- Leaves injected here -->
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button class="outline" onclick="turnPrev()">← Prev</button>
+  <div class="page-indicator" id="page-indicator">Cover</div>
+  <button class="outline" onclick="turnNext()">Next →</button>
+  <div style="width: 20px;"></div>
+  <button onclick="openModal()">+ Insert Page Here</button>
+  <button class="outline" onclick="goToNotesIndex()">My Notes Index</button>
+  <button class="outline" style="color:#ef4444; border-color:#ef4444;" onclick="resetWorkbook()">Reset All</button>
+</div>
+
+<div class="modal-overlay" id="insert-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>Insert Custom Page</h3>
+    <button class="modal-btn" onclick="addCustomLeaf('note')">📝 Add Lined Note Page</button>
+    <button class="modal-btn" onclick="addCustomLeaf('summary')">📊 Add Chapter Summary</button>
+    <button class="modal-btn" onclick="addCustomLeaf('tip')">💡 Add Tip Card</button>
+    <button class="modal-btn" style="background:transparent; border:none; margin-top:10px;" onclick="closeModal(true)">Cancel</button>
+  </div>
+</div>
+
+<script>
+// === Data ===
+const CHAPTERS = [
+  {
+    title: "Understanding Short-Video as a Sales Channel", role: "Content Specialist", time: "2 Hours",
+    objs: ["History of short-video commerce", "Platform landscape", "Audience behavior", "Why short-video sells"],
+    concept: `<h3>The Short-Video Landscape</h3><p>Short-video has revolutionized cross-border e-commerce. Platforms like TikTok, Instagram Reels, and YouTube Shorts have shifted consumer discovery from intent-based search to algorithmic feed discovery.</p><div class="callout"><strong>STAR DIGITAL Insight:</strong> Our data shows that 70% of impulse buys on TikTok originate from videos under 15 seconds.</div><p>For cross-border sellers, a well-crafted video can reach millions in the US or SEA markets without massive ad spend.</p>`,
+    example: `<h3>Worked Example: US Market Launch</h3><p><strong>The Client:</strong> A smart-home gadget brand aiming at the US market.</p><p><strong>The Strategy:</strong> Instead of high-production commercials, STAR DIGITAL produced 15 UGC-style videos showing the product fixing a common household annoyance.</p><p><strong>The Result:</strong> The "satisfying click" sound effect became a hook. The hero video achieved 4M views organically, driving a 300% ROAS.</p>`,
+    task: `<h3>Practice Task 1: Competitor Analysis</h3><p>Find three viral videos in your niche on TikTok.</p><div class="task-box"><ul><li>Identify the hook (first 3s).</li><li>What is the core message?</li><li>What is the Call to Action (CTA)?</li></ul></div><div class="checkboxes"><label><input type="checkbox" data-store="t1-1"> Found 3 videos</label><label><input type="checkbox" data-store="t1-2"> Analyzed hooks</label><label><input type="checkbox" data-store="t1-3"> Documented CTAs</label></div>`,
+    reflect: `<h3>Reflection</h3><div class="q-box"><p>Why did the most successful video hold your attention?</p><textarea data-store="r1-1"></textarea></div><div class="q-box"><p>How can you adapt that hook for a different product?</p><textarea data-store="r1-2"></textarea></div>`
+  },
+  {
+    title: "Scripting & Storyboarding", role: "Creative Planner", time: "3 Hours",
+    objs: ["Hook design (first 3 seconds)", "Narrative arcs for product video", "Shot list construction", "Storyboard templates"],
+    concept: `<h3>Structuring the Narrative</h3><p>A successful e-commerce video follows a distinct arc. The most reliable is the <strong>Problem-Solution-Demonstration-CTA</strong> framework.</p><div class="callout"><strong>STAR DIGITAL Insight:</strong> The first 3 seconds dictate 80% of your success. If the hook fails, the rest of the video doesn't matter.</div><p>Use visual hooks (unexpected action, striking colors) and auditory hooks (a provocative question, trending sound).</p>`,
+    example: `<h3>Worked Example: The "3-Second Rule"</h3><p>STAR DIGITAL tested two variations of a skincare video.</p><p><strong>Video A (Traditional):</strong> Started with a beautiful product shot. (15% retention at 3s)</p><p><strong>Video B (Hook-First):</strong> Started with a close-up of a common skin problem being instantly blurred. (65% retention at 3s)</p><p>Video B generated 5x more sales. The lesson: show the transformation immediately.</p>`,
+    task: `<h3>Practice Task 2: Storyboard Creation</h3><p>Draft a storyboard for a 15-second product video.</p><div class="task-box"><ul><li>0-3s: Hook</li><li>3-8s: Problem & Solution</li><li>8-12s: Demonstration</li><li>12-15s: Call to Action</li></ul></div><div class="checkboxes"><label><input type="checkbox" data-store="t2-1"> Hook planned</label><label><input type="checkbox" data-store="t2-2"> Timings assigned</label><label><input type="checkbox" data-store="t2-3"> CTA included</label></div>`,
+    reflect: `<h3>Reflection</h3><div class="q-box"><p>What is the most difficult part of scripting a 15-second video?</p><textarea data-store="r2-1"></textarea></div><div class="q-box"><p>How does your hook emotionally resonate with the target persona?</p><textarea data-store="r2-2"></textarea></div>`
+  },
+  {
+    title: "Shooting Fundamentals", role: "Videographer", time: "4 Hours",
+    objs: ["Smartphone shooting basics", "Lighting setups", "Composition rules", "Audio capture"],
+    concept: `<h3>Capturing Quality Footage</h3><p>You don't need cinema cameras. Modern smartphones are highly capable if you control the environment. The most critical factor is lighting.</p><div class="callout"><strong>STAR DIGITAL Insight:</strong> Natural daylight is best, but a simple 3-point lighting setup ensures consistency across your content batches.</div><p>Always clean your lens, lock focus and exposure, and shoot in 4K if your phone supports it, downsampling later for sharpness.</p>`,
+    example: `<h3>Worked Example: Studio Setup</h3><p>For a jewelry client, STAR DIGITAL used a simple light-box setup.</p><p>By positioning one strong key light at 45 degrees and a soft fill light opposite, we eliminated harsh shadows. We used a macro lens attachment on an iPhone 14 Pro.</p><p>The footage looked indistinguishable from high-end DSLR content, allowing for rapid daily content creation.</p>`,
+    task: `<h3>Practice Task 3: Shoot a Demo</h3><p>Shoot a 15-second product demonstration using only your smartphone.</p><div class="task-box"><ul><li>Use natural window light.</li><li>Shoot 5 different angles (B-roll).</li><li>Ensure the product logo is visible.</li></ul></div><div class="checkboxes"><label><input type="checkbox" data-store="t3-1"> Cleaned lens</label><label><input type="checkbox" data-store="t3-2"> Shot 5 angles</label><label><input type="checkbox" data-store="t3-3"> Lighting is even</label></div>`,
+    reflect: `<h3>Reflection</h3><div class="q-box"><p>What lighting challenges did you face during the shoot?</p><textarea data-store="r3-1"></textarea></div><div class="q-box"><p>How did changing angles alter the perception of the product?</p><textarea data-store="r3-2"></textarea></div>`
+  },
+  {
+    title: "Editing Workflow", role: "Video Editor", time: "3 Hours",
+    objs: ["Editing software overview (CapCut)", "Cut-to-beat editing", "Captions and subtitles", "Exporting specs"],
+    concept: `<h3>Post-Production Magic</h3><p>Editing is where the story comes together. For short-video, pacing is everything. You must cut out all dead air. Every frame must earn its place.</p><div class="callout"><strong>STAR DIGITAL Insight:</strong> CapCut is the industry standard because of its native integration with TikTok and massive library of trending templates and sounds.</div><p>Always use dynamic captions. A significant portion of users watch with sound off initially.</p>`,
+    example: `<h3>Worked Example: Pacing for Retention</h3><p>A tutorial video for a tech gadget was initially 45 seconds long.</p><p>STAR DIGITAL editors employed "jump cuts" to remove every breath and pause. We added sound effects (whooshes, pops) to visual transitions.</p><p>The final video was 22 seconds long. The completion rate skyrocketed from 12% to 48%.</p>`,
+    task: `<h3>Practice Task 4: Edit Your Demo</h3><p>Import your footage from Task 3 into CapCut.</p><div class="task-box"><ul><li>Trim to exactly 15 seconds.</li><li>Add a trending audio track.</li><li>Add auto-captions and stylize them.</li></ul></div><div class="checkboxes"><label><input type="checkbox" data-store="t4-1"> Trimmed footage</label><label><input type="checkbox" data-store="t4-2"> Added audio</label><label><input type="checkbox" data-store="t4-3"> Added captions</label></div>`,
+    reflect: `<h3>Reflection</h3><div class="q-box"><p>How did adding music change the mood of your video?</p><textarea data-store="r4-1"></textarea></div><div class="q-box"><p>What was the hardest part of the editing process?</p><textarea data-store="r4-2"></textarea></div>`
+  },
+  {
+    title: "Platform-Specific Optimization", role: "Social Media Manager", time: "2.5 Hours",
+    objs: ["TikTok algorithm signals", "Hashtag strategy", "Posting cadence", "Regional content adaptation"],
+    concept: `<h3>Feeding the Algorithm</h3><p>The algorithm is a recommendation engine built on user signals: watch time, completion rate, shares, saves, and likes.</p><div class="callout"><strong>STAR DIGITAL Insight:</strong> A "save" is often a stronger buying intent signal than a "like". Encourage users to save the video for later reference.</div><p>Adapt content for regions. US audiences prefer fast-paced, humorous content, while MENA audiences often engage deeply with high-quality aesthetics and storytelling.</p>`,
+    example: `<h3>Worked Example: Hashtag Strategy</h3><p>A fashion brand used generic tags like #fashion and #clothes.</p><p>STAR DIGITAL revamped the strategy to use niche, intent-driven tags: #summeroutfitinspo #midsizefashion #vacationlooks.</p><p>While total impressions dropped slightly, conversion rate doubled because the algorithm served the video to a highly targeted audience.</p>`,
+    task: `<h3>Practice Task 5: Platform Plan</h3><p>Create a posting schedule and tag strategy.</p><div class="task-box"><ul><li>Choose 3 primary hashtags.</li><li>Determine best posting times for your target timezone.</li><li>Draft a compelling caption.</li></ul></div><div class="checkboxes"><label><input type="checkbox" data-store="t5-1"> Hashtags selected</label><label><input type="checkbox" data-store="t5-2"> Times chosen</label><label><input type="checkbox" data-store="t5-3"> Caption drafted</label></div>`,
+    reflect: `<h3>Reflection</h3><div class="q-box"><p>Why is regional adaptation crucial in cross-border e-commerce?</p><textarea data-store="r5-1"></textarea></div><div class="q-box"><p>How will you encourage users to "save" your video?</p><textarea data-store="r5-2"></textarea></div>`
+  },
+  {
+    title: "Performance Review & Iteration", role: "Data Analyst", time: "2 Hours",
+    objs: ["Metrics that matter", "Reading Analytics", "A/B testing", "Building a content loop"],
+    concept: `<h3>Data-Driven Creativity</h3><p>Don't guess what works; let the data tell you. The most important metric in short-video commerce is the "Hook Rate" (percentage of viewers who stay past 3 seconds).</p><div class="callout"><strong>STAR DIGITAL Insight:</strong> If your hook rate is low, change the first 3 seconds. If your completion rate is low, fix the pacing. If CTR is low, strengthen the Call to Action.</div><p>Iteration is key. Test one variable at a time (e.g., same video, two different text overlays).</p>`,
+    example: `<h3>Worked Example: The Iteration Loop</h3><p>A client's video went viral but resulted in zero sales.</p><p>STAR DIGITAL analyzed the data: high completion rate, low CTR. The video was entertaining but didn't sell.</p><p>We iterated by adding a text sticker at the 10-second mark pointing to the link in bio, and an explicit verbal CTA. Views halved, but sales jumped to $10k in a week.</p>`,
+    task: `<h3>Capstone Task: Content Series</h3><p>Plan a 7-day content series for a hypothetical brand.</p><div class="task-box"><ul><li>Day 1-3: Awareness (Viral focus)</li><li>Day 4-5: Consideration (Demo focus)</li><li>Day 6-7: Conversion (Hard sell/Promo)</li></ul></div><div class="checkboxes"><label><input type="checkbox" data-store="t6-1"> Awareness planned</label><label><input type="checkbox" data-store="t6-2"> Consideration planned</label><label><input type="checkbox" data-store="t6-3"> Conversion planned</label></div>`,
+    reflect: `<h3>Reflection</h3><div class="q-box"><p>How will you handle a video that totally flops?</p><textarea data-store="r6-1"></textarea></div><div class="q-box"><p>What is your biggest takeaway from this workbook?</p><textarea data-store="r6-2"></textarea></div>`
+  }
+];
+
+const PAGES = [];
+// Front matter
+PAGES.push(
+  { type: 'cover', html: `<div class="cover-bg"><div class="cover-text"><h1>Short-Video Content Production</h1><h2>Workbook Edition</h2><hr/><p>STAR DIGITAL SOLUTION × Industry College</p></div><div class="course-code">SVC-201</div><div class="logo">STAR DIGITAL</div></div>` },
+  { type: 'inside_cover', html: `<div style="position:absolute; bottom:40px; font-size:0.8rem; color:#64748b;"><p>© STAR DIGITAL SOLUTION</p><p>For educational use within the Industry College program<br/>First Edition, 2026</p></div>` },
+  { type: 'title_page', html: `<h1 style="font-size:2rem; margin-top:50px;">Short-Video Content Production</h1><h2 style="font-size:1.2rem; color:#64748b; font-weight:400;">Workbook Edition</h2><div style="margin-top:100px;"><p><strong>Instructor:</strong> ____________________</p><p><strong>Student:</strong> <span class="editable" contenteditable="true" data-store="student-name" placeholder="Type your name..."></span></p></div>` },
+  { type: 'preface', html: `<h3>Preface</h3><p>Welcome to the <strong>Short-Video Content Production Workbook</strong>. This is not a passive textbook. It is a working manual that combines knowledge, practice, and personal reflection. As part of the STAR DIGITAL SOLUTION cross-border e-commerce talent pipeline, this book bridges theory and actual industry practice.</p><p>Treat this book as a living document. Annotate it. Insert notes. Add tips from your real-world campaigns. By the end of this course, this workbook should be uniquely yours, filled with your insights and ready to serve as your field reference.</p>` },
+  { type: 'how_to_use', html: `<h3>How to Use This Workbook</h3><ul style="list-style:none; padding:0; line-height:2;"><li>📖 <strong>Read</strong> the chapter content carefully.</li><li>✏️ <strong>Complete</strong> the practice tasks in the provided spaces.</li><li>📝 <strong>Insert</strong> your own notes anywhere using the "+" button.</li><li>💡 <strong>Capture</strong> specific insights as Tip Cards.</li></ul><p>Use the loose-leaf rings to insert custom pages anywhere. Your additions will be saved securely to your local storage.</p>` },
+  { type: 'toc', html: `<h3>Table of Contents</h3><ul class="toc-list" id="toc-list"></ul>` }
+);
+
+let currentPrintedPageNum = 1; // 0 is cover, 1 is inside cover, let's start TOC links appropriately
+
+CHAPTERS.forEach((ch, idx) => {
+  let chNum = (idx + 1).toString().padStart(2, '0');
+  let objList = ch.objs.map(o => `<li>${o}</li>`).join('');
+  PAGES.push({ type: 'chapter_opener', html: `<div class="ch-opener"><div class="ch-num">${chNum}</div><h2>${ch.title}</h2><p><strong>Learning Objectives:</strong></p><ul>${objList}</ul><div class="tags"><span>Time: ${ch.time}</span><span>Role: ${ch.role}</span></div></div>` });
+  PAGES.push({ type: 'concept', html: ch.concept });
+  PAGES.push({ type: 'example', html: ch.example });
+  PAGES.push({ type: 'task', html: ch.task });
+  PAGES.push({ type: 'reflection', html: ch.reflect });
+  PAGES.push({ type: 'blank', html: `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#cbd5e1; font-style:italic;">This page intentionally left blank.</div>` }); // Ensure next chapter starts on right side
+});
+
+// Back matter
+PAGES.push({ type: 'glossary', html: `<h3>Glossary</h3><dl style="line-height:1.6;"><dt><strong>Algorithm</strong></dt><dd>The recommendation system determining which videos are shown to users.</dd><dt><strong>B-Roll</strong></dt><dd>Supplemental footage intercut with the main shot.</dd><dt><strong>CTA</strong></dt><dd>Call to Action; an instruction to the audience to provoke an immediate response.</dd><dt><strong>Hook</strong></dt><dd>The first 3 seconds of a video designed to grab attention.</dd><dt><strong>ROAS</strong></dt><dd>Return on Ad Spend.</dd><dt><strong>UGC</strong></dt><dd>User Generated Content.</dd></dl>` });
+PAGES.push({ type: 'appendix', html: `<h3>Appendix A: STAR DIGITAL Checklist</h3><div class="checkboxes"><label><input type="checkbox" data-store="ck-1"> Hook is established within 3 seconds</label><label><input type="checkbox" data-store="ck-2"> Audio is clear and background noise minimal</label><label><input type="checkbox" data-store="ck-3"> Lighting evenly illuminates the product</label><label><input type="checkbox" data-store="ck-4"> Captions are accurate and stylized</label><label><input type="checkbox" data-store="ck-5"> Call to action is explicit</label></div>` });
+PAGES.push({ type: 'appendix', html: `<h3>Appendix B: Equipment Ref</h3><ul><li><strong>Camera:</strong> iPhone 13 Pro or newer recommended.</li><li><strong>Lighting:</strong> Basic 10-inch ring light or softbox pair.</li><li><strong>Audio:</strong> Wireless lavalier mic (e.g., DJI Mic).</li><li><strong>Software:</strong> CapCut (Mobile/Desktop).</li></ul>` });
+PAGES.push({ type: 'notes_index', html: `<h3>My Notes Index</h3><div id="notes-index-container"></div>` });
+PAGES.push({ type: 'blank', html: `` });
+PAGES.push({ type: 'back_cover', html: `<div class="cover-bg" style="align-items:center; text-align:center;"><div class="logo" style="position:static; font-size:1.5rem; margin-bottom:20px;">STAR DIGITAL</div><p style="color:var(--book-accent); max-width:80%;">Empowering the next generation of cross-border e-commerce professionals.</p><div style="margin-top:50px; padding:10px; background:#fff; width:150px; height:50px;"><div style="width:100%; height:100%; background:repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);"></div></div></div>` });
+
+let customLeaves = JSON.parse(localStorage.getItem('svc-workbook-custom')) || [];
+let currentLeaf = parseInt(localStorage.getItem('svc-workbook-leaf')) || 0;
+
+// === Render ===
+let leavesData = [];
+let printedLeaves = [];
+
+function buildLeaves() {
+  printedLeaves = [];
+  let pageCounter = 0;
+  for (let i = 0; i < PAGES.length; i += 2) {
+    let frontPage = PAGES[i];
+    let backPage = PAGES[i+1];
+    printedLeaves.push({
+      id: 'p_leaf_' + (i/2),
+      type: 'printed',
+      front: frontPage,
+      back: backPage,
+      pageNumFront: pageCounter++,
+      pageNumBack: pageCounter++
+    });
+  }
+
+  const customMap = {};
+  customLeaves.forEach(cl => {
+    if (!customMap[cl.afterLeafId]) customMap[cl.afterLeafId] = [];
+    customMap[cl.afterLeafId].push(cl);
+  });
+
+  function flatten(leafId) {
+    let result = [];
+    let leaf = printedLeaves.find(l => l.id === leafId) || customLeaves.find(l => l.id === leafId);
+    if (leaf) result.push(leaf);
+    if (customMap[leafId]) {
+      customMap[leafId].forEach(cl => {
+        result = result.concat(flatten(cl.id));
+      });
+    }
+    return result;
+  }
+
+  leavesData = [];
+  printedLeaves.forEach(pl => {
+    leavesData = leavesData.concat(flatten(pl.id));
+  });
+}
+
+function getLeafHtml(leaf) {
+  let frontHtml = '', backHtml = '';
+  if (leaf.type === 'printed') {
+    frontHtml = leaf.front ? leaf.front.html : '';
+    backHtml = leaf.back ? leaf.back.html : '';
+  } else if (leaf.type === 'note') {
+    frontHtml = `<div class="custom-header">Note</div><div class="custom-body" contenteditable="true" data-store="cust-${leaf.id}-1" placeholder="Write your notes here...">${leaf.content1 || ''}</div>`;
+  } else if (leaf.type === 'summary') {
+    frontHtml = `<div class="custom-header">Chapter Summary</div>
+    <h4>Key Concepts</h4><div class="custom-body small" contenteditable="true" data-store="cust-${leaf.id}-1">${leaf.content1 || ''}</div>
+    <h4>What I Learned</h4><div class="custom-body small" contenteditable="true" data-store="cust-${leaf.id}-2">${leaf.content2 || ''}</div>
+    <h4>Questions I Still Have</h4><div class="custom-body small" contenteditable="true" data-store="cust-${leaf.id}-3">${leaf.content3 || ''}</div>`;
+  } else if (leaf.type === 'tip') {
+    frontHtml = `<div class="tip-card"><div class="custom-header">💡 Quick Tip</div><div class="custom-body" contenteditable="true" data-store="cust-${leaf.id}-1" placeholder="Your insight...">${leaf.content1 || ''}</div><input type="text" class="tag-input" placeholder="#tag" data-store="cust-${leaf.id}-tag" value="${leaf.tag || ''}"></div>`;
+    backHtml = `<div class="tip-card"></div>`;
+  }
+
+  let delBtn = leaf.type !== 'printed' ? `<button class="del-btn" onclick="deleteCustomLeaf('${leaf.id}')">🗑️</button>` : '';
+
+  // Skip page numbers on cover and back cover
+  let numF = '', numB = '';
+  if (leaf.type === 'printed') {
+    if (leaf.pageNumFront > 1 && leaf.pageNumFront < PAGES.length - 2) numF = leaf.pageNumFront;
+    if (leaf.pageNumBack > 1 && leaf.pageNumBack < PAGES.length - 2) numB = leaf.pageNumBack;
+  } else {
+    numF = `Note · Inserted`;
+    numB = `Note · Inserted`;
+  }
+
+  return `
+    <div class="face front">
+      <div class="holes"><div class="hole"></div><div class="hole"></div><div class="hole"></div></div>
+      <div class="page-content">${frontHtml}</div>
+      ${delBtn}
+      ${numF ? `<div class="page-number">${numF}</div>` : ''}
+    </div>
+    <div class="face back">
+      <div class="holes"><div class="hole"></div><div class="hole"></div><div class="hole"></div></div>
+      <div class="page-content">${backHtml}</div>
+      ${numB ? `<div class="page-number">${numB}</div>` : ''}
+    </div>
+  `;
+}
+
+function renderBook() {
+  const bookEl = document.getElementById('book');
+  bookEl.querySelectorAll('.leaf').forEach(e => e.remove()); // clear old leaves
+
+  leavesData.forEach((leaf, i) => {
+    const el = document.createElement('div');
+    el.className = `leaf ${leaf.type}`;
+    if (i < currentLeaf) {
+      el.classList.add('turned');
+      el.style.zIndex = i + 1; // Left stack
+    } else {
+      el.style.zIndex = leavesData.length - i; // Right stack
+    }
+    el.innerHTML = getLeafHtml(leaf);
+    bookEl.appendChild(el);
+    leaf.el = el;
+  });
+
+  updateTOC();
+  updateNotesIndex();
+  updateBookPosition();
+  loadInputs(); // rebind data
+}
+
+// === Page Turn ===
+function turnNext() {
+  if (currentLeaf >= leavesData.length) return;
+  const leaf = leavesData[currentLeaf];
+  leaf.el.classList.add('turning');
+  leaf.el.classList.add('turned');
+  playRustle();
+  
+  leaf.el.style.zIndex = currentLeaf + 1;
+  currentLeaf++;
+  
+  setTimeout(() => leaf.el.classList.remove('turning'), 700);
+  updateBookPosition();
+}
+
+function turnPrev() {
+  if (currentLeaf <= 0) return;
+  currentLeaf--;
+  const leaf = leavesData[currentLeaf];
+  leaf.el.classList.add('turning');
+  leaf.el.classList.remove('turned');
+  playRustle();
+  
+  leaf.el.style.zIndex = leavesData.length - currentLeaf;
+  
+  setTimeout(() => leaf.el.classList.remove('turning'), 700);
+  updateBookPosition();
+}
+
+function goToLeaf(index) {
+  if (index === currentLeaf) return;
+  const diff = index - currentLeaf;
+  const step = diff > 0 ? 1 : -1;
+  const interval = setInterval(() => {
+    if (currentLeaf === index) {
+      clearInterval(interval);
+    } else {
+      if (step > 0) turnNext();
+      else turnPrev();
+    }
+  }, 100); // fast turn
+}
+
+function updateBookPosition() {
+  const bookEl = document.getElementById('book');
+  if (currentLeaf === 0 || currentLeaf === leavesData.length) {
+    bookEl.classList.remove('open');
+  } else {
+    bookEl.classList.add('open');
+  }
+  
+  let label = currentLeaf === 0 ? "Cover" : (currentLeaf === leavesData.length ? "Back Cover" : `Spread ${currentLeaf}`);
+  document.getElementById('page-indicator').textContent = label;
+  localStorage.setItem('svc-workbook-leaf', currentLeaf);
+}
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+  if (e.key === 'ArrowRight') turnNext();
+  if (e.key === 'ArrowLeft') turnPrev();
+  if (e.key === 'n') addCustomLeaf('note');
+  if (e.key === 's') addCustomLeaf('summary');
+  if (e.key === 't') addCustomLeaf('tip');
+});
+
+// === Custom Pages ===
+function openModal() {
+  if (currentLeaf === 0 || currentLeaf === leavesData.length) {
+    alert("Please open the book to insert a page.");
+    return;
+  }
+  document.getElementById('insert-modal').classList.add('active');
+}
+function closeModal(e) {
+  if (e === true || e.target.id === 'insert-modal') {
+    document.getElementById('insert-modal').classList.remove('active');
+  }
+}
+
+function addCustomLeaf(type) {
+  closeModal(true);
+  const afterLeafId = currentLeaf > 0 ? leavesData[currentLeaf - 1].id : null;
+  if (!afterLeafId) return;
+  
+  const newLeaf = {
+    id: 'custom_' + Date.now(),
+    afterLeafId: afterLeafId,
+    type: type
+  };
+  customLeaves.push(newLeaf);
+  saveCustomLeaves();
+  
+  buildLeaves();
+  renderBook();
+}
+
+function deleteCustomLeaf(id) {
+  if(confirm("Delete this custom page?")) {
+    customLeaves = customLeaves.filter(l => l.id !== id);
+    saveCustomLeaves();
+    // adjust currentLeaf if we are deleting the one we are looking at
+    let idx = leavesData.findIndex(l => l.id === id);
+    if (idx < currentLeaf) currentLeaf--;
+    buildLeaves();
+    renderBook();
+  }
+}
+
+function saveCustomLeaves() {
+  localStorage.setItem('svc-workbook-custom', JSON.stringify(customLeaves));
+}
+
+function updateNotesIndex() {
+  const container = document.getElementById('notes-index-container');
+  if (!container) return;
+  if (customLeaves.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8; font-style:italic;">No custom notes inserted yet. Use the "+ Insert Page Here" button to add your own pages.</p>';
+    return;
+  }
+  let html = '<ul class="toc-list">';
+  customLeaves.forEach(cl => {
+    let lIndex = leavesData.findIndex(l => l.id === cl.id);
+    let title = cl.type === 'note' ? 'Lined Note Page' : (cl.type === 'summary' ? 'Chapter Summary' : 'Tip Card');
+    html += `<li onclick="goToLeaf(${lIndex})"><span>📝 ${title}</span><span>Go &rarr;</span></li>`;
+  });
+  html += '</ul>';
+  container.innerHTML = html;
+}
+
+function updateTOC() {
+  const tocList = document.getElementById('toc-list');
+  if(!tocList) return;
+  let html = '';
+  CHAPTERS.forEach((ch, idx) => {
+    // Find the leaf containing this chapter opener
+    let leafIdx = leavesData.findIndex(l => l.type === 'printed' && l.front && l.front.html.includes(ch.title));
+    if(leafIdx !== -1) {
+       html += `<li onclick="goToLeaf(${leafIdx})"><span>Chapter ${idx+1}: ${ch.title}</span><span>Go &rarr;</span></li>`;
+    }
+  });
+  // Add glossary
+  let glossIdx = leavesData.findIndex(l => l.type === 'printed' && l.front && l.front.html.includes('Glossary'));
+  if(glossIdx !== -1) html += `<li onclick="goToLeaf(${glossIdx})"><span>Glossary & Appendices</span><span>Go &rarr;</span></li>`;
+  tocList.innerHTML = html;
+}
+
+function goToNotesIndex() {
+  let idx = leavesData.findIndex(l => l.type === 'printed' && l.front && l.front.html.includes('My Notes Index'));
+  if (idx !== -1) goToLeaf(idx);
+}
+
+// === Persistence ===
+function saveInputs() {
+  const inputs = document.querySelectorAll('[data-store]');
+  const data = JSON.parse(localStorage.getItem('svc-workbook-inputs')) || {};
+  inputs.forEach(el => {
+    if (el.type === 'checkbox') data[el.dataset.store] = el.checked;
+    else if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') data[el.dataset.store] = el.value;
+    else data[el.dataset.store] = el.innerHTML;
+  });
+  localStorage.setItem('svc-workbook-inputs', JSON.stringify(data));
+  updateStudentNameDisplay();
+
+  // Also update customLeaves array if editing a custom page
+  inputs.forEach(el => {
+    if (el.dataset.store.startsWith('cust-')) {
+      let parts = el.dataset.store.split('-');
+      let id = parts[1];
+      let field = parts[2]; // 1, 2, 3, or tag
+      let leaf = customLeaves.find(l => l.id === id);
+      if (leaf) {
+        let val = el.tagName === 'INPUT' ? el.value : el.innerHTML;
+        if(field === 'tag') leaf.tag = val;
+        else leaf['content' + field] = val;
+      }
+    }
+  });
+  saveCustomLeaves();
+}
+
+function loadInputs() {
+  const data = JSON.parse(localStorage.getItem('svc-workbook-inputs')) || {};
+  const inputs = document.querySelectorAll('[data-store]');
+  inputs.forEach(el => {
+    if (data[el.dataset.store] !== undefined) {
+      if (el.type === 'checkbox') el.checked = data[el.dataset.store];
+      else if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') el.value = data[el.dataset.store];
+      else el.innerHTML = data[el.dataset.store];
+    }
+  });
+  updateStudentNameDisplay();
+}
+
+let debounceTimer;
+document.addEventListener('input', (e) => {
+  if (e.target.matches('[data-store]')) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(saveInputs, 300);
+  }
+});
+
+function getStudentName() {
+  const data = JSON.parse(localStorage.getItem('svc-workbook-inputs')) || {};
+  let name = data['student-name'] || '';
+  return name.replace(/<[^>]*>?/gm, '').trim() || 'Student'; // strip html
+}
+function updateStudentNameDisplay() {
+  document.getElementById('student-name-display').textContent = getStudentName();
+}
+
+function resetWorkbook() {
+  if(confirm("This will erase all your notes, summaries, checkboxes, and tips. Continue?")) {
+    localStorage.removeItem('svc-workbook-custom');
+    localStorage.removeItem('svc-workbook-inputs');
+    localStorage.removeItem('svc-workbook-leaf');
+    location.reload();
+  }
+}
+
+// === Audio ===
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playRustle() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const bufferSize = audioCtx.sampleRate * 0.15; // 150ms
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+  
+  const noiseSource = audioCtx.createBufferSource();
+  noiseSource.buffer = buffer;
+  
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 800;
+  filter.Q.value = 1;
+  
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+  
+  noiseSource.connect(filter);
+  filter.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  noiseSource.start();
+}
+
+// === Init ===
+buildLeaves();
+renderBook();
+
+</script>
+</body>
+</html>

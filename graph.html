@@ -303,6 +303,14 @@
     <h3 id="sp-name">Node Name</h3>
     <p id="sp-desc">Description goes here...</p>
     
+    <div class="course-info-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--panel-border);">
+      <div class="list-title">Course Description</div>
+      <p id="sp-course-desc" style="font-size: 0.8125rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 1.5rem;"></p>
+      
+      <div class="list-title">Learning Chapters</div>
+      <ul class="rel-list" id="sp-course-chapters" style="margin-bottom: 1.5rem;"></ul>
+    </div>
+    
     <div class="list-title">Prerequisites</div>
     <ul class="rel-list" id="sp-pre"></ul>
     
@@ -403,6 +411,7 @@
           id: nId,
           name: chapterName,
           course: course.name,
+          courseId: course.id,
           stage: course.stage,
           color: color,
           desc: `Essential module in ${course.name} focusing on practical ${chapterName.toLowerCase()} execution for cross-border e-commerce professionals.`,
@@ -744,6 +753,29 @@
       document.getElementById('sp-name').style.color = node.color;
       document.getElementById('sp-desc').textContent = node.desc;
 
+      const courseObj = RAW_COURSES.find(c => c.id === node.courseId);
+      if (courseObj) {
+        document.getElementById('sp-course-desc').textContent = `Comprehensive curriculum designed to build proficiency in ${courseObj.name}. It covers core methodologies and practical industry applications essential for cross-border e-commerce professionals.`;
+        
+        const chaptersList = document.getElementById('sp-course-chapters');
+        chaptersList.innerHTML = '';
+        courseObj.chapters.forEach((ch, idx) => {
+          const li = document.createElement('li');
+          li.className = 'rel-item';
+          const chNode = NODES.find(n => n.courseId === courseObj.id && n.name === ch);
+          const isCurrent = chNode && chNode.id === node.id;
+          if (isCurrent) {
+            li.style.background = 'rgba(255,255,255,0.15)';
+            li.style.borderLeft = `3px solid ${node.color}`;
+          }
+          li.innerHTML = `<div class="rel-dot" style="background:${chNode ? chNode.color : '#cbd5e1'}"></div><span style="${isCurrent ? 'font-weight:700;' : ''}">${idx + 1}. ${ch}</span>`;
+          if (chNode) {
+            li.onclick = () => jumpToNode(chNode.id);
+          }
+          chaptersList.appendChild(li);
+        });
+      }
+
       const preList = document.getElementById('sp-pre');
       preList.innerHTML = '';
       if(node.pre.length === 0) preList.innerHTML = '<li style="font-size:0.8rem;color:#64748b;">None</li>';
@@ -951,6 +983,30 @@
     }
 
     animate();
+
+    // Handle URL parameters for selection
+    setTimeout(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('course');
+      const chapterName = urlParams.get('chapter');
+      
+      let targetNode = null;
+      if (chapterName) {
+        targetNode = NODES.find(n => n.name === chapterName);
+      } else if (courseId) {
+        targetNode = NODES.find(n => n.courseId === courseId);
+      }
+
+      if (targetNode) {
+        selectNode(targetNode.id);
+        
+        // Rotate graph so the node faces the camera
+        const targetPos = targetNode.pos.clone().normalize();
+        const cameraDir = new THREE.Vector3(0, 0, 1);
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(targetPos, cameraDir);
+        graphGroup.setRotationFromQuaternion(quaternion);
+      }
+    }, 100);
 
   </script>
 </body>
