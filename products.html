@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modular Curriculum System | STAR DIGITAL SOLUTION</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            national: '#93c5fd', /* Blue-300 for National */
+            industry: '#fdba74', /* Orange-300 for Industry */
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #f8fafc; }
+    
+    .course-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
+      cursor: default;
+      height: 100%;
+      min-height: 70px;
+    }
+    .course-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .segment-industry { background-color: var(--tw-colors-industry); }
+    .segment-national { background-color: var(--tw-colors-national); }
+    
+    .course-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #0f172a;
+      z-index: 10;
+      line-height: 1.25;
+    }
+    
+    .segment-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: #1e293b;
+      position: absolute;
+      left: 6px;
+      letter-spacing: 0.05em;
+    }
+    .segment-label.top { top: 3px; }
+    .segment-label.bottom { bottom: 3px; }
+    
+    /* Tooltip */
+    .course-card .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #f8fafc;
+      text-align: left;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.75rem;
+      width: max-content;
+      max-width: 260px;
+      z-index: 50;
+      transition: opacity 0.2s, bottom 0.2s;
+      pointer-events: none;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+    .course-card .tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -6px;
+      border-width: 6px;
+      border-style: solid;
+      border-color: #0f172a transparent transparent transparent;
+    }
+    .course-card:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+      bottom: 105%;
+    }
+
+    .dashed-connectors {
+      background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+      background-size: 12px 2px;
+      background-repeat: repeat-x;
+      background-position: center;
+    }
+  </style>
+</head>
+<body class="text-slate-800 p-4 md:p-6 lg:p-8">
+  <div class="max-w-[1400px] mx-auto bg-slate-50">
+    
+    <!-- HEADER -->
+    <header class="mb-8 relative">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-slate-300">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight">STAR DIGITAL SOLUTION × Industry College</h1>
+          <h2 class="text-base md:text-lg text-slate-600 font-medium mt-1">Modular Curriculum System for the Cross-Border E-Commerce Professional Cluster</h2>
+        </div>
+        
+        <!-- Legend -->
+        <div class="mt-4 md:mt-0 bg-slate-100 p-3 rounded-lg border border-slate-300 shadow-sm text-xs w-full md:w-auto shrink-0">
+          <div class="font-bold mb-2 text-slate-800 uppercase tracking-wider text-[10px]">Curriculum Origin Legend</div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <div class="w-3.5 h-3.5 bg-industry rounded-[3px] shadow-inner"></div>
+            <span class="font-medium text-slate-800">Industry-Specific (STAR DIGITAL)</span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-3.5 h-3.5 bg-national rounded-[3px] shadow-inner"></div>
+            <span class="font-medium text-slate-800">National Standard Content</span>
+          </div>
+          <div class="text-[0.65rem] text-slate-600 border-t border-slate-300 pt-1.5 mt-1.5 leading-relaxed">
+            Visual stack shows school-enterprise split.<br>
+            <span class="text-orange-800 font-bold">⭐ 100% Enterprise-Led Practicum</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Industry Chain Ribbon -->
+      <div class="flex flex-col sm:flex-row rounded-lg h-auto sm:h-8 text-[10px] sm:text-[0.65rem] font-bold text-slate-700 overflow-hidden shadow-sm border border-slate-300 bg-slate-100">
+        <div class="flex-1 py-2 sm:py-0 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 uppercase tracking-wider bg-slate-200">Sourcing</div>
+        <div class="flex-[1.5] py-2 sm:py-0 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-blue-300 bg-blue-200 text-blue-900 uppercase tracking-wider">Listing & Ops <span class="hidden md:inline ml-1 opacity-75">(Major 1)</span></div>
+        <div class="flex-[1.5] py-2 sm:py-0 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-purple-300 bg-purple-200 text-purple-900 uppercase tracking-wider">Marketing & Live <span class="hidden md:inline ml-1 opacity-75">(Major 2)</span></div>
+        <div class="flex-1 py-2 sm:py-0 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 uppercase tracking-wider bg-slate-200">Logistics & Customs</div>
+        <div class="flex-[1.5] py-2 sm:py-0 flex items-center justify-center bg-teal-200 text-teal-900 uppercase tracking-wider">Data & Analytics <span class="hidden md:inline ml-1 opacity-75">(Major 3)</span></div>
+      </div>
+    </header>
+
+    <!-- TIER 3: CROSS-ELECTIVE -->
+    <section class="mb-6">
+      <div class="flex items-center mb-3">
+        <h3 class="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-800 bg-slate-100 px-3 py-1.5 rounded-md shadow-sm border border-slate-300 z-10 relative">Tier 3: Cross-Elective (顶层可互选)</h3>
+        <div class="dashed-connectors flex-1 ml-4 h-[2px]"></div>
+      </div>
+      <div class="bg-slate-100 p-5 rounded-xl shadow-sm border border-slate-300 relative overflow-hidden">
+        <div class="absolute inset-0 bg-slate-200/50"></div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 relative z-10">
+          
+          <!-- Elective 1 -->
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 4;"><span class="segment-label top">40% Ind.</span></div>
+            <div class="segment-national relative" style="flex: 6;"><span class="segment-label bottom">60% Nat.</span></div>
+            <div class="course-label">AI-Assisted Listing Opt.</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">AI-Assisted Listing Optimization</strong><span class="text-industry font-bold">40% Industry</span> / <span class="text-blue-300 font-bold">60% National</span><p class="mt-1.5 text-slate-300 font-normal">Cross-major elective focusing on LLMs for localized copywriting.</p></div>
+          </div>
+          
+          <!-- Elective 2 -->
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 6;"><span class="segment-label top">60% Ind.</span></div>
+            <div class="segment-national relative" style="flex: 4;"><span class="segment-label bottom">40% Nat.</span></div>
+            <div class="course-label">Brand-Going-Global Strategy</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Brand-Going-Global Strategy</strong><span class="text-industry font-bold">60% Industry</span> / <span class="text-blue-300 font-bold">40% National</span><p class="mt-1.5 text-slate-300 font-normal">Strategic brand positioning and DTC execution overseas.</p></div>
+          </div>
+
+          <!-- Elective 3 -->
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20% Ind.</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label">Compliance & Tax</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Compliance & Tax for Cross-Border</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span><p class="mt-1.5 text-slate-300 font-normal">VAT, customs duties, and intellectual property compliance.</p></div>
+          </div>
+
+          <!-- Elective 4 -->
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 5;"><span class="segment-label top">50% Ind.</span></div>
+            <div class="segment-national relative" style="flex: 5;"><span class="segment-label bottom">50% Nat.</span></div>
+            <div class="course-label">Emerging Market Entry</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Emerging Market Entry</strong><span class="text-industry font-bold">50% Industry</span> / <span class="text-blue-300 font-bold">50% National</span><p class="mt-1.5 text-slate-300 font-normal">Exploring LATAM, MENA, and SEA market dynamics.</p></div>
+          </div>
+
+          <!-- Elective 5 -->
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 7;"><span class="segment-label top">70% Ind.</span></div>
+            <div class="segment-national relative" style="flex: 3;"><span class="segment-label bottom">30% Nat.</span></div>
+            <div class="course-label">Gen-AI for E-Commerce</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Generative AI for Content</strong><span class="text-industry font-bold">70% Industry</span> / <span class="text-blue-300 font-bold">30% National</span><p class="mt-1.5 text-slate-300 font-normal">Midjourney and SD workflows for product imagery.</p></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TIER 2: DISTINCT SPECIALIZATION -->
+    <section class="mb-6">
+      <div class="flex items-center mb-4">
+        <h3 class="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-800 bg-slate-100 px-3 py-1.5 rounded-md shadow-sm border border-slate-300 z-10 relative">Tier 2: Distinct Specialization (中层可分立)</h3>
+        <div class="dashed-connectors flex-1 ml-4 h-[2px]"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Major 1 -->
+        <div class="bg-slate-100 rounded-xl shadow-sm border border-slate-300 flex flex-col overflow-hidden relative">
+          <div class="absolute inset-x-0 top-0 h-1 bg-blue-600"></div>
+          <div class="bg-slate-200 border-b border-slate-300 p-4 text-center">
+            <h4 class="font-bold text-slate-900">Cross-Border E-Commerce</h4>
+            <p class="text-[10px] text-slate-600 uppercase tracking-widest mt-1">Platform & Ops Focus</p>
+          </div>
+          <div class="p-5 flex-1 flex flex-col gap-3">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center"><div class="w-2 h-2 rounded-full bg-slate-300 mr-2"></div>Professional Core (6:4)</div>
+            
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Amazon/Shopee Ops</div>
+              <div class="tooltip"><strong>Amazon/Shopee Platform Operations</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Logistics & Customs</div>
+              <div class="tooltip"><strong>Cross-Border Logistics & Customs</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Overseas Warehouse Mgt</div>
+              <div class="tooltip"><strong>Overseas Warehouse Management</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Intl Payment & Risk</div>
+              <div class="tooltip"><strong>International Payment & Risk Control</strong><br>6:4 Ratio</div>
+            </div>
+            
+            <div class="text-[10px] font-bold text-industry uppercase tracking-wider mt-3 mb-1 flex items-center"><div class="w-2 h-2 rounded-full bg-industry mr-2"></div>Practicum (0:10)</div>
+            <div class="course-card h-20 border-2 border-industry shadow-md shadow-industry/20">
+               <div class="segment-industry" style="flex:10"><span class="absolute top-1.5 right-1.5 text-xs">⭐</span></div>
+               <div class="course-label text-sm">Live Storefront Operations</div>
+               <div class="tooltip"><strong class="block mb-1 text-sm text-industry">STAR DIGITAL Live Storefront Operations Project</strong><p class="mt-1 text-slate-300 font-normal">100% Enterprise-led real-world practicum.</p></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Major 2 -->
+        <div class="bg-slate-100 rounded-xl shadow-sm border border-slate-300 flex flex-col overflow-hidden relative">
+          <div class="absolute inset-x-0 top-0 h-1 bg-purple-500"></div>
+          <div class="bg-slate-200 border-b border-slate-300 p-4 text-center">
+            <h4 class="font-bold text-slate-900">Digital Mktg & Livestream</h4>
+            <p class="text-[10px] text-slate-600 uppercase tracking-widest mt-1">Traffic & Content Focus</p>
+          </div>
+          <div class="p-5 flex-1 flex flex-col gap-3">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center"><div class="w-2 h-2 rounded-full bg-slate-300 mr-2"></div>Professional Core (6:4)</div>
+            
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Short-Video Production</div>
+              <div class="tooltip"><strong>Short-Video Content Production</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Livestream Selling Ops</div>
+              <div class="tooltip"><strong>Livestream Selling Operations</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Social Media Traffic</div>
+              <div class="tooltip"><strong>Social Media Traffic Acquisition</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Influencer & KOL Collab</div>
+              <div class="tooltip"><strong>Influencer & KOL Collaboration</strong><br>6:4 Ratio</div>
+            </div>
+            
+            <div class="text-[10px] font-bold text-industry uppercase tracking-wider mt-3 mb-1 flex items-center"><div class="w-2 h-2 rounded-full bg-industry mr-2"></div>Practicum (0:10)</div>
+            <div class="course-card h-20 border-2 border-industry shadow-md shadow-industry/20">
+               <div class="segment-industry" style="flex:10"><span class="absolute top-1.5 right-1.5 text-xs">⭐</span></div>
+               <div class="course-label text-sm">TikTok Livestream Studio</div>
+               <div class="tooltip"><strong class="block mb-1 text-sm text-industry">STAR DIGITAL TikTok Livestream Studio Project</strong><p class="mt-1 text-slate-300 font-normal">100% Enterprise-led real-world practicum.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Major 3 -->
+        <div class="bg-slate-100 rounded-xl shadow-sm border border-slate-300 flex flex-col overflow-hidden relative">
+          <div class="absolute inset-x-0 top-0 h-1 bg-teal-500"></div>
+          <div class="bg-slate-200 border-b border-slate-300 p-4 text-center">
+            <h4 class="font-bold text-slate-900">Business Data Analytics</h4>
+            <p class="text-[10px] text-slate-600 uppercase tracking-widest mt-1">Insight & Strategy Focus</p>
+          </div>
+          <div class="p-5 flex-1 flex flex-col gap-3">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center"><div class="w-2 h-2 rounded-full bg-slate-300 mr-2"></div>Professional Core (6:4)</div>
+            
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">E-Commerce Data Analytics</div>
+              <div class="tooltip"><strong>E-Commerce Data Analytics</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">BI Tools & Dashboarding</div>
+              <div class="tooltip"><strong>BI Tools & Dashboarding</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Consumer Insight & A/B</div>
+              <div class="tooltip"><strong>Consumer Insight & A/B Testing</strong><br>6:4 Ratio</div>
+            </div>
+            <div class="course-card h-14"><div class="segment-industry" style="flex:4"></div><div class="segment-national" style="flex:6"></div><div class="course-label">Sales Forecast & Inv. Opt.</div>
+              <div class="tooltip"><strong>Sales Forecasting & Inventory Optimization</strong><br>6:4 Ratio</div>
+            </div>
+            
+            <div class="text-[10px] font-bold text-industry uppercase tracking-wider mt-3 mb-1 flex items-center"><div class="w-2 h-2 rounded-full bg-industry mr-2"></div>Practicum (0:10)</div>
+            <div class="course-card h-20 border-2 border-industry shadow-md shadow-industry/20">
+               <div class="segment-industry" style="flex:10"><span class="absolute top-1.5 right-1.5 text-xs">⭐</span></div>
+               <div class="course-label text-sm">Cross-Border Data Decision</div>
+               <div class="tooltip"><strong class="block mb-1 text-sm text-industry">STAR DIGITAL Cross-Border Data Decision Project</strong><p class="mt-1 text-slate-300 font-normal">100% Enterprise-led real-world practicum.</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      
+      <!-- Industrial Production Practice (Shared Real-Project Zone at bottom of middle tier) -->
+      <div class="mt-8 bg-gradient-to-r from-industry/5 via-industry/10 to-industry/5 border border-industry/20 rounded-xl p-5 md:p-6 relative shadow-sm">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-industry text-white text-xs md:text-sm font-bold px-5 py-1.5 rounded-full shadow-md flex items-center gap-2 whitespace-nowrap">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+          Industrial Production Practice (100% Enterprise-Led)
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-3">
+          <div class="course-card h-16 border border-industry/40"><div class="segment-industry" style="flex:10"></div><div class="course-label text-[11px]">Real-Account Store Ops</div><div class="tooltip"><strong>Real-Account Store Operations</strong></div></div>
+          <div class="course-card h-16 border border-industry/40"><div class="segment-industry" style="flex:10"></div><div class="course-label text-[11px]">Peak-Season War Room</div><div class="tooltip"><strong>Peak-Season Campaign War Room</strong></div></div>
+          <div class="course-card h-16 border border-industry/40"><div class="segment-industry" style="flex:10"></div><div class="course-label text-[11px]">Overseas CS Center</div><div class="tooltip"><strong>Overseas Customer Service Center</strong></div></div>
+          <div class="course-card h-16 border border-industry/40"><div class="segment-industry" style="flex:10"></div><div class="course-label text-[11px]">End-to-End Fulfillment</div><div class="tooltip"><strong>End-to-End Order Fulfillment Sprint</strong></div></div>
+          <div class="course-card h-16 border border-industry/40"><div class="segment-industry" style="flex:10"></div><div class="course-label text-[11px]">Capstone: Store Launch</div><div class="tooltip"><strong>Capstone — Independent Cross-Border Store Launch</strong></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIER 1: SHAREABLE FOUNDATION -->
+    <section class="mb-8">
+      <div class="flex items-center mb-4">
+        <h3 class="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-800 bg-slate-100 px-3 py-1.5 rounded-md shadow-sm border border-slate-300 z-10 relative">Tier 1: Shareable Foundation (底层可共享)</h3>
+        <div class="dashed-connectors flex-1 ml-4 h-[2px]"></div>
+      </div>
+      <div class="bg-slate-100 p-5 rounded-xl shadow-sm border border-slate-300">
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+          <!-- 6 Foundation courses (8:2) -->
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20%</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label text-[11px]">Intro to Cross-Border E-Com</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Intro to Cross-Border E-Commerce</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span></div>
+          </div>
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20%</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label text-[11px]">Business English</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Business English Communication</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span></div>
+          </div>
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20%</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label text-[11px]">Intl Trade Practice</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">International Trade Practice</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span></div>
+          </div>
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20%</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label text-[11px]">Digital Tools & Office</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Digital Tools & Office Automation</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span></div>
+          </div>
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20%</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label text-[11px]">Consumer Psychology</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Consumer Psychology Fundamentals</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span></div>
+          </div>
+          <div class="course-card h-20">
+            <div class="segment-industry relative" style="flex: 2;"><span class="segment-label top">20%</span></div>
+            <div class="segment-national relative" style="flex: 8;"><span class="segment-label bottom">80% Nat.</span></div>
+            <div class="course-label text-[11px]">Cross-Cultural Etiquette</div>
+            <div class="tooltip"><strong class="block mb-1 text-sm">Cross-Cultural Business Etiquette</strong><span class="text-industry font-bold">20% Industry</span> / <span class="text-blue-300 font-bold">80% National</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="text-center pt-4 border-t border-slate-200">
+      <p class="text-xs text-slate-500 font-medium">Built systematically by STAR DIGITAL SOLUTION and academic partners. Scale indicates structural resource allocation per module.</p>
+    </footer>
+
+  </div>
+</body>
+</html>
