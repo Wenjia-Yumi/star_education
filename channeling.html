@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Order Channeling Program | STAR DIGITAL SOLUTION</title>
+  <meta name="description" content="Bringing live cross-border e-commerce orders into the classroom — students earn while they learn on real client work.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       CSS Variables & Base Theme
+       ========================================== */
+    :root {
+      /* Colors */
+      --primary-teal: #0E3A3A;
+      --primary-navy: #1B2A4E;
+      --accent-gold: #C9A961;
+      --accent-gold-hover: #DFBF77;
+      --bg-light: #F8F4EC;
+      --bg-dark-teal: #0A2D2D;
+      --bg-dark-navy: #121E36;
+      --text-main: #1A1A1A;
+      --text-muted: #5C6B73;
+      --text-light: #E0E6ED;
+      
+      --cool-blue: #3D7BB8;
+      --cool-blue-tint: #EAF2FA;
+      --cool-blue-glow: rgba(61, 123, 184, 0.4);
+      
+      /* Difficulty Badges */
+      --badge-low-bg: hsl(142, 70%, 95%);
+      --badge-low-text: hsl(142, 76%, 22%);
+      --badge-low-border: hsl(142, 60%, 85%);
+      
+      --badge-med-bg: hsl(38, 92%, 93%);
+      --badge-med-text: hsl(38, 90%, 25%);
+      --badge-med-border: hsl(38, 80%, 82%);
+      
+      --badge-high-bg: hsl(0, 93%, 95%);
+      --badge-high-text: hsl(0, 84%, 30%);
+      --badge-high-border: hsl(0, 80%, 86%);
+
+      /* Typography */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-display: 'Manrope', sans-serif;
+      --font-serif: 'Lora', Georgia, serif;
+      
+      /* Layout & Shadows */
+      --max-width: 1280px;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.12);
+      --transition-speed: 0.3s;
+    }
+
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background-color: var(--bg-light);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Accessibility Focus Rings */
+    a:focus-visible, button:focus-visible, [tabindex="0"]:focus-visible {
+      outline: 3px solid var(--accent-gold);
+      outline-offset: 2px;
+    }
+
+    /* Print Stylesheet integration */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 11pt !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-page-break {
+        page-break-before: always;
+      }
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      section {
+        padding: 2rem 0 !important;
+        border-bottom: 1px solid #ddd;
+      }
+      .timeline-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 10px !important;
+      }
+      .desc-box {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+      }
+    }
+
+    /* Layout Utilities */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    section {
+      padding: 100px 0;
+      overflow: hidden;
+    }
+
+    .section-dark {
+      background-color: var(--primary-navy);
+      color: var(--text-light);
+      background-image: linear-gradient(135deg, var(--bg-dark-navy) 0%, var(--primary-navy) 100%);
+    }
+
+    .section-light {
+      background-color: var(--bg-light);
+      color: var(--text-main);
+    }
+
+    /* Typography Utilities */
+    h1, h2, h3, h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .section-subtitle-serif {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 48px;
+      position: relative;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -12px;
+      width: 48px;
+      height: 3px;
+      background-color: var(--accent-gold);
+    }
+
+    .section-dark .section-title {
+      color: #FFF;
+    }
+
+    /* Intersection Observer - Scroll Animations */
+    .fade-rise {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fade-rise.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================
+       Header & Navigation
+       ========================================== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      background-color: rgba(14, 58, 58, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .header-scrolled {
+      background-color: rgba(14, 58, 58, 0.98);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 12px 0;
+    }
+
+    .header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-wordmark {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #FFF;
+    }
+
+    .logo-wordmark span {
+      color: var(--accent-gold);
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-left: 6px;
+      padding-left: 6px;
+      border-left: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 32px;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: color var(--transition-speed) ease;
+      position: relative;
+      padding: 6px 0;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent-gold);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--accent-gold);
+      transition: width var(--transition-speed) ease;
+    }
+
+    .nav-link:hover::after, .nav-link.active::after {
+      width: 100%;
+    }
+
+    /* Mobile Hamburger Menu */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--primary-teal);
+        padding: 24px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        border-bottom: 2px solid var(--accent-gold);
+        gap: 16px;
+      }
+      .nav-links.show {
+        display: flex;
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    /* ==========================================
+       Hero Section
+       ========================================== */
+    .hero-section {
+      padding: 160px 0 100px;
+      background-color: var(--primary-teal);
+      background-image: linear-gradient(135deg, var(--bg-dark-teal) 0%, var(--primary-teal) 100%);
+      color: #FFF;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-tag {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-headline {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+      line-height: 1.15;
+    }
+
+    .hero-headline span {
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 500;
+      color: var(--text-light);
+      margin-top: 12px;
+      font-family: var(--font-sans);
+    }
+
+    .hero-subheadline {
+      font-size: 1.15rem;
+      color: rgba(255, 255, 255, 0.85);
+      max-width: 720px;
+      margin-bottom: 60px;
+      line-height: 1.6;
+    }
+
+    .hero-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 80px;
+    }
+
+    .stat-tile {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all var(--transition-speed) ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .stat-tile:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-gold);
+      transform: translateY(-5px);
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-decoration: none;
+      transition: color var(--transition-speed) ease;
+    }
+
+    .scroll-indicator:hover {
+      color: var(--accent-gold);
+    }
+
+    .scroll-arrow {
+      width: 24px;
+      height: 24px;
+      animation: bounce 2s infinite;
+      stroke: currentColor;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-8px);
+      }
+      60% {
+        transform: translateY(-4px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-headline {
+        font-size: 2.5rem;
+      }
+      .hero-headline span {
+        font-size: 1.35rem;
+      }
+      .hero-stats-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .stat-tile {
+        padding: 16px;
+      }
+    }
+
+    /* ==========================================
+       Section 2: Three Order Sources
+       ========================================== */
+    .sources-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 48px;
+    }
+
+    .source-card {
+      background-color: #FFFFFF;
+      border: 1px solid rgba(14, 58, 58, 0.08);
+      border-radius: 16px;
+      padding: 40px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--card-shadow);
+      transition: all var(--transition-speed) cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .source-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--card-shadow-hover);
+      border-color: rgba(201, 169, 97, 0.4);
+    }
+
+    .source-badge {
+      position: absolute;
+      top: 32px;
+      right: 40px;
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: rgba(201, 169, 97, 0.15);
+      line-height: 1;
+    }
+
+    .source-card:hover .source-badge {
+      color: rgba(201, 169, 97, 0.3);
+    }
+
+    .source-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary-teal);
+      margin-bottom: 20px;
+      padding-right: 48px;
+      line-height: 1.35;
+    }
+
+    .source-description {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: auto;
+      line-height: 1.6;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .tag {
+      background-color: rgba(61, 123, 184, 0.08);
+      color: var(--primary-navy);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    @media (max-width: 1024px) {
+      .sources-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .source-card {
+        padding: 32px;
+      }
+    }
+
+    /* ==========================================
+       Section 3: Order Types & Difficulty
+       ========================================== */
+    .grading-intro {
+      max-width: 800px;
+      margin-bottom: 50px;
+    }
+
+    .grading-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    /* Subsection 3a: Table */
+    .table-container {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow-x: auto;
+      margin-bottom: 80px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .order-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    .order-table th {
+      background-color: rgba(14, 58, 58, 0.3);
+      color: #FFF;
+      font-weight: 600;
+      font-family: var(--font-display);
+      padding: 18px 24px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.8px;
+    }
+
+    .order-table td {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .order-table tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .order-table td strong {
+      color: #FFF;
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-low {
+      background-color: var(--badge-low-bg);
+      color: var(--badge-low-text);
+      border-color: var(--badge-low-border);
+    }
+
+    .badge-med {
+      background-color: var(--badge-med-bg);
+      color: var(--badge-med-text);
+      border-color: var(--badge-med-border);
+    }
+
+    .badge-high {
+      background-color: var(--badge-high-bg);
+      color: var(--badge-high-text);
+      border-color: var(--badge-high-border);
+    }
+
+    .badge-separator {
+      margin: 0 4px;
+      opacity: 0.5;
+    }
+
+    /* Subsection 3b: Difficulty Level Cards */
+    .difficulty-levels-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: #FFF;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .difficulty-levels-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .difficulty-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .difficulty-card {
+      border-radius: 16px;
+      padding: 32px;
+      color: #FFF;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .difficulty-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .diff-basic {
+      background: linear-gradient(135deg, #1C4D4D 0%, #0E3A3A 100%);
+      border-top: 4px solid var(--cool-blue);
+    }
+
+    .diff-intermediate {
+      background: linear-gradient(135deg, #3A2F1D 0%, #1F190F 100%);
+      border-top: 4px solid #DF9F28;
+    }
+
+    .diff-complex {
+      background: linear-gradient(135deg, #4A3E25 0%, #2A2312 100%);
+      border-top: 4px solid var(--accent-gold);
+    }
+
+    .diff-badge-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+
+    .diff-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .diff-stage-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-gold);
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+
+    .diff-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .diff-examples {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .diff-examples-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .diff-examples-list {
+      list-style: none;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .diff-examples-list li {
+      position: relative;
+      padding-left: 14px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .diff-examples-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--accent-gold);
+    }
+
+    @media (max-width: 1024px) {
+      .difficulty-row {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+
+    /* ==========================================
+       Section 4: The Five-Stage Workflow
+       ========================================== */
+    .workflow-header {
+      max-width: 800px;
+      margin-bottom: 64px;
+    }
+
+    .workflow-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+    }
+
+    /* Timeline Container & Grid */
+    .timeline-container {
+      position: relative;
+      margin: 80px 0;
+      padding: 20px 0;
+    }
+
+    /* 3-Row Desktop Grid powered by display: contents */
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: auto 160px auto;
+      align-items: center;
+      position: relative;
+    }
+
+    .timeline-stage-col {
+      display: contents; /* Dissolves the container so children align to the grid directly */
+    }
+
+    /* Desktop Grid Placements */
+    .timeline-stage-col[data-stage="1"] .desc-box.top { grid-column: 1; grid-row: 1; align-self: end; }
+    .timeline-stage-col[data-stage="1"] .node-wrapper   { grid-column: 1; grid-row: 2; justify-self: center; }
+    .timeline-stage-col[data-stage="1"] .desc-box.bottom { grid-column: 1; grid-row: 3; align-self: start; }
+
+    .timeline-stage-col[data-stage="2"] .desc-box.top { grid-column: 2; grid-row: 1; align-self: end; }
+    .timeline-stage-col[data-stage="2"] .node-wrapper   { grid-column: 2; grid-row: 2; justify-self: center; }
+    .timeline-stage-col[data-stage="2"] .desc-box.bottom { grid-column: 2; grid-row: 3; align-self: start; }
+
+    .timeline-stage-col[data-stage="3"] .desc-box.top { grid-column: 3; grid-row: 1; align-self: end; }
+    .timeline-stage-col[data-stage="3"] .node-wrapper   { grid-column: 3; grid-row: 2; justify-self: center; }
+    .timeline-stage-col[data-stage="3"] .desc-box.bottom { grid-column: 3; grid-row: 3; align-self: start; }
+
+    .timeline-stage-col[data-stage="4"] .desc-box.top { grid-column: 4; grid-row: 1; align-self: end; }
+    .timeline-stage-col[data-stage="4"] .node-wrapper   { grid-column: 4; grid-row: 2; justify-self: center; }
+    .timeline-stage-col[data-stage="4"] .desc-box.bottom { grid-column: 4; grid-row: 3; align-self: start; }
+
+    .timeline-stage-col[data-stage="5"] .desc-box.top { grid-column: 5; grid-row: 1; align-self: end; }
+    .timeline-stage-col[data-stage="5"] .node-wrapper   { grid-column: 5; grid-row: 2; justify-self: center; }
+    .timeline-stage-col[data-stage="5"] .desc-box.bottom { grid-column: 5; grid-row: 3; align-self: start; }
+
+    /* Track Line wrapping under the node row */
+    .timeline-track-wrapper {
+      grid-column: 1 / span 5;
+      grid-row: 2;
+      height: 4px;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .timeline-track {
+      width: 100%;
+      height: 4px;
+      background-color: var(--cool-blue);
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+
+    .timeline-track::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 12px solid var(--cool-blue);
+    }
+
+    /* Stage Circle Nodes */
+    .node-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .node-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: var(--cool-blue);
+      color: #FFF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: var(--font-display);
+      cursor: pointer;
+      box-shadow: 0 0 0 6px rgba(61, 123, 184, 0.15);
+      transition: all var(--transition-speed) ease;
+      user-select: none;
+    }
+
+    .node-circle:hover, .node-circle.active {
+      transform: scale(1.1);
+      background-color: var(--primary-teal);
+      box-shadow: 0 0 0 8px rgba(14, 58, 58, 0.2), 0 0 20px var(--cool-blue-glow);
+    }
+
+    .node-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      opacity: 0.8;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .node-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .node-name small {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      opacity: 0.9;
+      margin-top: 1px;
+    }
+
+    /* Description Boxes */
+    .desc-box {
+      background-color: var(--cool-blue-tint);
+      border-left: 4px solid var(--cool-blue);
+      border-radius: 8px;
+      padding: 16px 20px;
+      width: 100%;
+      position: relative;
+      box-shadow: var(--card-shadow);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .desc-box:hover {
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+      border-left-color: var(--primary-teal);
+    }
+
+    .desc-box.spotlight {
+      background-color: #E6F0FA;
+      box-shadow: 0 0 15px rgba(61, 123, 184, 0.25);
+      border-left-color: var(--accent-gold);
+    }
+
+    .desc-title {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary-navy);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .desc-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background-color: rgba(27, 42, 78, 0.1);
+    }
+
+    .desc-box p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Connectors on Desktop (Vertical offsets) */
+    .desc-box.top::after {
+      content: '';
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 35px;
+      background-color: rgba(61, 123, 184, 0.3);
+      z-index: -1;
+      transition: background-color var(--transition-speed) ease;
+    }
+
+    .desc-box.bottom::after {
+      content: '';
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 35px;
+      background-color: rgba(61, 123, 184, 0.3);
+      z-index: -1;
+      transition: background-color var(--transition-speed) ease;
+    }
+
+    .desc-box.top.spotlight::after,
+    .desc-box.bottom.spotlight::after {
+      background-color: var(--accent-gold);
+    }
+
+    /* Service Level Commitments Table */
+    .commitments-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--primary-teal);
+      margin: 80px 0 24px;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .commitments-table-container {
+      background-color: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+
+    .commitments-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    .commitments-table th {
+      background-color: rgba(61, 123, 184, 0.08);
+      color: var(--primary-navy);
+      font-weight: 700;
+      font-family: var(--font-display);
+      padding: 16px 24px;
+      border-bottom: 2px solid rgba(61, 123, 184, 0.15);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    .commitments-table td {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      color: var(--text-muted);
+    }
+
+    .commitments-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .commitments-table tbody tr:hover {
+      background-color: rgba(61, 123, 184, 0.02);
+    }
+
+    .commitments-table td strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Responsive & Stepper collapse
+       ========================================== */
+    @media (max-width: 900px) {
+      .timeline-track-wrapper {
+        display: none;
+      }
+      .timeline-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        position: relative;
+        padding-left: 40px;
+        align-items: flex-start;
+      }
+      
+      /* Vertical Line for Mobile */
+      .timeline-grid::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20px;
+        width: 4px;
+        height: 100%;
+        background-color: var(--cool-blue);
+        z-index: 1;
+      }
+
+      .timeline-stage-col {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .desc-box {
+        height: auto !important;
+      }
+
+      /* Reset Grid specific placement selectors */
+      .desc-box.top, 
+      .node-wrapper, 
+      .desc-box.bottom {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        align-self: stretch !important;
+        justify-self: stretch !important;
+      }
+      
+      .node-wrapper {
+        z-index: 2;
+        margin-left: -30px; /* pull onto vertical line */
+      }
+
+      .node-circle {
+        width: 60px;
+        height: 60px;
+        box-shadow: 0 0 0 4px rgba(61, 123, 184, 0.15);
+      }
+
+      .node-num {
+        font-size: 0.65rem;
+      }
+
+      .node-name {
+        font-size: 0.75rem;
+      }
+
+      .node-name small {
+        font-size: 0.6rem;
+      }
+
+      .desc-box.top::after,
+      .desc-box.bottom::after {
+        display: none; /* remove desktop vertical connector lines */
+      }
+    }
+
+    /* ==========================================
+       Section 5: Footer
+       ========================================== */
+    .footer {
+      background-color: var(--bg-dark-teal);
+      color: var(--text-light);
+      padding: 80px 0 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 48px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand {
+      max-width: 400px;
+    }
+
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #FFF;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+
+    .footer-logo span {
+      color: var(--accent-gold);
+    }
+
+    .footer-tagline {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
+    }
+
+    .footer-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+
+    .footer-links-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #FFF;
+      margin-bottom: 8px;
+    }
+
+    .footer-link {
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color var(--transition-speed) ease;
+    }
+
+    .footer-link:hover {
+      color: var(--accent-gold);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .footer-copy {
+      letter-spacing: 0.2px;
+    }
+
+    .footer-contact {
+      display: flex;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .footer-top {
+        flex-direction: column;
+        gap: 32px;
+      }
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       Header / Navigation Strip
+       ========================================== -->
+  <header class="header no-print" id="main-header">
+    <div class="container">
+      <a href="#" class="logo-area" aria-label="STAR DIGITAL Solution Home">
+        <div class="logo-wordmark">STAR DIGITAL<span>Industry College</span></div>
+      </a>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-controls="nav-links" aria-expanded="false">
+        &#9776;
+      </button>
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#overview" class="nav-link">Overview</a></li>
+          <li><a href="#sources" class="nav-link">Order Sources</a></li>
+          <li><a href="#grading" class="nav-link">Order Types</a></li>
+          <li><a href="#workflow" class="nav-link">Workflow</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==========================================
+         Section 1: Hero
+         ========================================== -->
+    <section class="hero-section" id="overview">
+      <div class="container hero-container">
+        <div class="hero-tag">STAR DIGITAL SOLUTION × Industry College</div>
+        <h1 class="hero-headline">
+          Real-Order Channeling Program
+          <span>引产入校项目</span>
+        </h1>
+        <p class="hero-subheadline">
+          Bringing live cross-border e-commerce orders into the classroom — students earn while they learn, on real client work.
+        </p>
+
+        <!-- Quick Stats -->
+        <div class="hero-stats-row">
+          <div class="stat-tile">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Order Sources</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Order Types</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value">5-Stage</div>
+            <div class="stat-label">Workflow on Platform</div>
+          </div>
+        </div>
+
+        <a href="#sources" class="scroll-indicator no-print" aria-label="Scroll down to explore">
+          <span>Scroll to explore</span>
+          <svg class="scroll-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Section 2: Three Order Sources
+         ========================================== -->
+    <section class="section-light" id="sources">
+      <div class="container">
+        <span class="section-subtitle-serif">Integrated Industrial Pipelines</span>
+        <h2 class="section-title">Where the orders come from</h2>
+        
+        <div class="sources-grid">
+          <!-- Card 01 -->
+          <div class="source-card fade-rise">
+            <div class="source-badge">01</div>
+            <h3 class="source-title">STAR DIGITAL Philippines HQ Outsourcing to China</h3>
+            <p class="source-description">
+              Deep partnerships with global brands including L'Oréal, Maybelline, Nestlé, Unilever, P&G, Colgate, Disney Marvel, and more. A substantial volume of remotely-deliverable work is outsourced from the Philippines Headquarters directly to the China side, driving internationalized training.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Main-image design</span>
+              <span class="tag">Short-video editing</span>
+              <span class="tag">KOL outreach support</span>
+              <span class="tag">Store-data analysis</span>
+              <span class="tag">AI livestream scripting</span>
+              <span class="tag">Cross-border ad-data review</span>
+            </div>
+          </div>
+
+          <!-- Card 02 -->
+          <div class="source-card fade-rise">
+            <div class="source-badge">02</div>
+            <h3 class="source-title">Yigao Technology Group (一高科技集团) Authorized Channel</h3>
+            <p class="source-description">
+              As STAR DIGITAL's sole authorized partner in China, Yigao Technology Group channels its domestic and cross-border e-commerce client projects directly into the Industry College. Projects are routed dynamically based on student capability fit and training milestones.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Localization for Chinese brands in Philippines</span>
+              <span class="tag">Cloud-product operations</span>
+              <span class="tag">Content production</span>
+              <span class="tag">Consulting project execution</span>
+            </div>
+          </div>
+
+          <!-- Card 03 -->
+          <div class="source-card fade-rise">
+            <div class="source-badge">03</div>
+            <h3 class="source-title">In-House Incubated "Cloud-Product" Hit Products</h3>
+            <p class="source-description">
+              Under the "校中厂" (in-school factory) operating model, the Cloud-Product Hit-Product R&D Lab incubates the Industry College's own branded products. Operating these products on cross-border channels becomes an internal order pipeline. Students act as co-incubators, gaining both operational and entrepreneurial experience.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Own-brand operations</span>
+              <span class="tag">Cross-border channel ops</span>
+              <span class="tag">Innovation & entrepreneurship training</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Section 3: Order Types & Difficulty
+         ========================================== -->
+    <section class="section-dark" id="grading">
+      <div class="container">
+        <span class="section-subtitle-serif">Task Architecture & Grading Matrix</span>
+        <h2 class="section-title">Order types & how we grade them</h2>
+
+        <!-- Subsection 3a: Six Order Types Table -->
+        <div class="grading-intro fade-rise">
+          <p class="grading-subtitle">
+            To ensure instructional safety and commercial quality, deliverables are divided into six major categories with explicit scope and color-coded difficulty indicators.
+          </p>
+        </div>
+
+        <div class="table-container fade-rise">
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th style="width: 25%">Order Type</th>
+                <th style="width: 55%">Core Deliverables</th>
+                <th style="width: 20%">Difficulty Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Visual Design</strong></td>
+                <td>Cross-border main images, product detail pages, brand visual assets</td>
+                <td>
+                  <span class="badge badge-low">Low</span>
+                  <span class="badge-separator">–</span>
+                  <span class="badge badge-med">Medium</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Short-Video Content</strong></td>
+                <td>Short-video editing, livestream clipping, cross-border content creation</td>
+                <td>
+                  <span class="badge badge-low">Low</span>
+                  <span class="badge-separator">–</span>
+                  <span class="badge badge-high">High</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Influencer Operations</strong></td>
+                <td>KOL outreach, partnership communication, content review</td>
+                <td>
+                  <span class="badge badge-med">Medium</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Store Operations</strong></td>
+                <td>TikTok Shop store management, platform compliance, customer service</td>
+                <td>
+                  <span class="badge badge-med">Medium</span>
+                  <span class="badge-separator">–</span>
+                  <span class="badge badge-high">High</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Livestream Business</strong></td>
+                <td>AI livestream scripting, co-hosts/main hosts, scripts, post-stream review</td>
+                <td>
+                  <span class="badge badge-med">Medium</span>
+                  <span class="badge-separator">–</span>
+                  <span class="badge badge-high">High</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Cross-Border Logistics</strong></td>
+                <td>Cross-border customs follow-up, overseas warehouse coordination, logistics cost accounting</td>
+                <td>
+                  <span class="badge badge-med">Medium</span>
+                  <span class="badge-separator">–</span>
+                  <span class="badge badge-high">High</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Subsection 3b: Three Difficulty Levels -->
+        <h3 class="difficulty-levels-title fade-rise">Escalating Progression Model</h3>
+        
+        <div class="difficulty-row">
+          <!-- Level 1 -->
+          <div class="difficulty-card diff-basic fade-rise">
+            <div class="diff-badge-icon">⚙️</div>
+            <h4 class="diff-name">Basic Level (基础工单)</h4>
+            <div class="diff-stage-tag">Collaborative Apprentice Stage</div>
+            <p class="diff-desc">
+              Standardized, templated, and highly reusable deliverables. Geared toward students developing initial industry awareness and basic operational competencies.
+            </p>
+            <div class="diff-examples">
+              <div class="diff-examples-title">Typical Examples</div>
+              <ul class="diff-examples-list">
+                <li>Single main-image draft</li>
+                <li>Single short-video rough cut</li>
+                <li>Initial influencer outreach emails</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Level 2 -->
+          <div class="difficulty-card diff-intermediate fade-rise">
+            <div class="diff-badge-icon">💎</div>
+            <h4 class="diff-name">Intermediate Level (中级工单)</h4>
+            <div class="diff-stage-tag">Independent Apprentice Stage</div>
+            <p class="diff-desc">
+              Requires active professional judgment and creativity. Deliverables must meet clear client acceptance standards under standardized workflows.
+            </p>
+            <div class="diff-examples">
+              <div class="diff-examples-title">Typical Examples</div>
+              <ul class="diff-examples-list">
+                <li>Complete main-image delivery pack</li>
+                <li>Finished short-video final cut</li>
+                <li>Full influencer collaboration chain</li>
+                <li>Daily operations of a single store</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Level 3 -->
+          <div class="difficulty-card diff-complex fade-rise">
+            <div class="diff-badge-icon">🏆</div>
+            <h4 class="diff-name">Complex Level (高级工单)</h4>
+            <div class="diff-stage-tag">Pre-Employee Stage</div>
+            <p class="diff-desc">
+              Multi-stage coordination requiring comprehensive project management, strategic problem solving, and complex client acceptance criteria.
+            </p>
+            <div class="diff-examples">
+              <div class="diff-examples-title">Typical Examples</div>
+              <ul class="diff-examples-list">
+                <li>Batch content production for brand matrices</li>
+                <li>Monthly contracted store operations</li>
+                <li>Full-event livestream scripting & execution</li>
+                <li>End-to-end cross-border project delivery</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Section 4: The Five-Stage Workflow
+         ========================================== -->
+    <section class="section-light" id="workflow">
+      <div class="container">
+        <span class="section-subtitle-serif">Traceable Platform Operations</span>
+        <h2 class="section-title">The full lifecycle, on one platform</h2>
+        <div class="workflow-header fade-rise">
+          <p class="workflow-subtitle">
+            Every step from dispatch to settlement runs on STAR DIGITAL's proprietary teaching & service outsourcing platform — every action timestamped, traceable, and auditable.
+          </p>
+        </div>
+
+        <!-- 5-Stage Interactive Timeline Piece -->
+        <div class="timeline-container fade-rise">
+          
+          <div class="timeline-grid">
+            <!-- Row 2 (Desktop): Track Line -->
+            <div class="timeline-track-wrapper no-print">
+              <div class="timeline-track"></div>
+            </div>
+
+            <!-- Stage 1: Dispatch -->
+            <div class="timeline-stage-col" data-stage="1">
+              <div class="desc-box top" data-stage="1">
+                <div class="desc-title">Enterprise / 企业端</div>
+                <p>Company posts order requirements based on real teaching or outsourcing needs — outlining difficulty, guidelines, scope, unit price, and deadlines.</p>
+              </div>
+              
+              <div class="node-wrapper">
+                <div class="node-circle" data-stage="1" tabindex="0" role="button" aria-label="Stage 1: Dispatch (派单)">
+                  <span class="node-num">01</span>
+                  <span class="node-name">Dispatch<small>派单</small></span>
+                </div>
+              </div>
+              
+              <div class="desc-box bottom" data-stage="1">
+                <div class="desc-title">Student / 学生端</div>
+                <p>Orders sync in real-time. Apprentices select orders matching their learning stage (collaborative / independent / pre-employee) and capability profiles.</p>
+              </div>
+            </div>
+
+            <!-- Stage 2: Accept -->
+            <div class="timeline-stage-col" data-stage="2">
+              <div class="desc-box top" data-stage="2">
+                <div class="desc-title">Enterprise / 企业端</div>
+                <p>Allows group forming. Students may bundle into collaborative teams for medium and high difficulty orders to ensure high completion rate.</p>
+              </div>
+              
+              <div class="node-wrapper">
+                <div class="node-circle" data-stage="2" tabindex="0" role="button" aria-label="Stage 2: Accept (接单)">
+                  <span class="node-num">02</span>
+                  <span class="node-name">Accept<small>接单</small></span>
+                </div>
+              </div>
+              
+              <div class="desc-box bottom" data-stage="2">
+                <div class="desc-title">Student / 学生端</div>
+                <p>Order acceptances are logged on the platform — storing who accepted, timestamps, committed delivery window, and skill checkpoints.</p>
+              </div>
+            </div>
+
+            <!-- Stage 3: Deliver -->
+            <div class="timeline-stage-col" data-stage="3">
+              <div class="desc-box top" data-stage="3">
+                <div class="desc-title">Enterprise / 企业端</div>
+                <p>Mentor consultation is provided. Apprentices can communicate with industry mentors via the platform's chat module during designated office hours.</p>
+              </div>
+              
+              <div class="node-wrapper">
+                <div class="node-circle" data-stage="3" tabindex="0" role="button" aria-label="Stage 3: Deliver (交付)">
+                  <span class="node-num">03</span>
+                  <span class="node-name">Deliver<small>交付</small></span>
+                </div>
+              </div>
+              
+              <div class="desc-box bottom" data-stage="3">
+                <div class="desc-title">Student / 学生端</div>
+                <p>Apprentices upload the actual deliverables (designs, videos, scripts, logs, data audits) directly to the platform within the agreed deadline.</p>
+              </div>
+            </div>
+
+            <!-- Stage 4: Verify -->
+            <div class="timeline-stage-col" data-stage="4">
+              <div class="desc-box top" data-stage="4">
+                <div class="desc-title">Enterprise / 企业端</div>
+                <p>Enterprise clients initiate first-tier checks on the platform. The enterprise mentor reviews quality, professional norms, and industry standards.</p>
+              </div>
+              
+              <div class="node-wrapper">
+                <div class="node-circle" data-stage="4" tabindex="0" role="button" aria-label="Stage 4: Verify (验收)">
+                  <span class="node-num">04</span>
+                  <span class="node-name">Verify<small>验收</small></span>
+                </div>
+              </div>
+              
+              <div class="desc-box bottom" data-stage="4">
+                <div class="desc-title">Student / 学生端</div>
+                <p>Second-tier check runs via the order business unit against real-market criteria (STAR DIGITAL × Yigao real chain). Dual verification ensures robust log accountability.</p>
+              </div>
+            </div>
+
+            <!-- Stage 5: Settle -->
+            <div class="timeline-stage-col" data-stage="5">
+              <div class="desc-box top" data-stage="5">
+                <div class="desc-title">Enterprise / 企业端</div>
+                <p>Once verified, the dispatch unit price is routed to the settlement queue. System generates statements within 15 working days post natural month.</p>
+              </div>
+              
+              <div class="node-wrapper">
+                <div class="node-circle" data-stage="5" tabindex="0" role="button" aria-label="Stage 5: Settle (结算)">
+                  <span class="node-num">05</span>
+                  <span class="node-name">Settle<small>结算</small></span>
+                </div>
+              </div>
+              
+              <div class="desc-box bottom" data-stage="5">
+                <div class="desc-title">Student / 学生端</div>
+                <p>Apprentices receive monthly payouts based on the STAR DIGITAL algorithm. They can track cumulative orders, settlements, and GMV contribution metrics.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Level Commitments Table -->
+        <h3 class="commitments-title fade-rise">Service Level Commitments (服务时效承诺)</h3>
+        
+        <div class="commitments-table-container fade-rise">
+          <table class="commitments-table">
+            <thead>
+              <tr>
+                <th style="width: 50%">Process Node (流程环节)</th>
+                <th style="width: 50%">Time Commitment (时效承诺)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dispatch visible to all</strong> (工单全员同步)</td>
+                <td>Real-time sync upon publish (发布后实时同步)</td>
+              </tr>
+              <tr>
+                <td><strong>Apprentice acceptance deadline</strong> (学员接单截止时限)</td>
+                <td>Within 48 hours of dispatch (派单后48小时内)</td>
+              </tr>
+              <tr>
+                <td><strong>Enterprise mentor first response to query</strong> (企业导师首回应时效)</td>
+                <td>Within 24 hours (24小时内回应)</td>
+              </tr>
+              <tr>
+                <td><strong>Dual verification completion</strong> (双重验收完成时限)</td>
+                <td>Within 14 working days of delivery (交付后14个工作日内)</td>
+              </tr>
+              <tr>
+                <td><strong>Monthly settlement statement generation</strong> (月度结算账单生成)</td>
+                <td>Within 15 working days of month-end, adjustable by account terms (自然月结束后15个工作日内)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+
+  <!-- ==========================================
+       Interactive Scripts
+       ========================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Mobile Hamburger Menu Toggle
+      const menuToggle = document.getElementById('menu-toggle');
+      const navLinks = document.getElementById('nav-links');
+
+      menuToggle.addEventListener('click', () => {
+        const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', !expanded);
+        navLinks.classList.toggle('show');
+      });
+
+      // Close menu on link click
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          menuToggle.setAttribute('aria-expanded', 'false');
+          navLinks.classList.remove('show');
+        });
+      });
+
+      // 2. Header Scroll Effect
+      const header = document.getElementById('main-header');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          header.classList.add('header-scrolled');
+        } else {
+          header.classList.remove('header-scrolled');
+        }
+      });
+
+      // 3. Navigation Highlight on Scroll (Active Link Tracking)
+      const sections = document.querySelectorAll('section[id]');
+      const navLinksElements = document.querySelectorAll('.nav-link');
+      
+      const onScroll = () => {
+        let scrollPos = window.scrollY + 120; // Offset for header height
+        sections.forEach(section => {
+          const top = section.offsetTop;
+          const height = section.offsetHeight;
+          const id = section.getAttribute('id');
+          
+          if (scrollPos >= top && scrollPos < top + height) {
+            navLinksElements.forEach(link => {
+              link.classList.remove('active');
+              if (link.getAttribute('href') === `#${id}`) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      };
+      window.addEventListener('scroll', onScroll);
+
+      // 4. Timeline Stage Interaction Spotlight Effect
+      const nodes = document.querySelectorAll('.node-circle');
+      const descBoxes = document.querySelectorAll('.desc-box');
+
+      nodes.forEach(node => {
+        const stageNum = node.getAttribute('data-stage');
+        
+        // Highlight corresponding top/bottom boxes on Hover / Focus
+        const highlightStage = (active) => {
+          descBoxes.forEach(box => {
+            if (box.getAttribute('data-stage') === stageNum) {
+              if (active) {
+                box.classList.add('spotlight');
+              } else {
+                box.classList.remove('spotlight');
+              }
+            }
+          });
+        };
+
+        node.addEventListener('mouseenter', () => highlightStage(true));
+        node.addEventListener('mouseleave', () => highlightStage(false));
+        node.addEventListener('focus', () => highlightStage(true));
+        node.addEventListener('blur', () => highlightStage(false));
+
+        // Click to toggle sticky active state
+        node.addEventListener('click', () => {
+          const alreadyActive = node.classList.contains('active');
+          nodes.forEach(n => n.classList.remove('active'));
+          descBoxes.forEach(b => b.classList.remove('spotlight'));
+          
+          if (!alreadyActive) {
+            node.classList.add('active');
+            descBoxes.forEach(b => {
+              if (b.getAttribute('data-stage') === stageNum) {
+                b.classList.add('spotlight');
+              }
+            });
+          }
+        });
+      });
+
+      // 5. Scroll Reveal Animation (Intersection Observer)
+      const animateElements = document.querySelectorAll('.fade-rise');
+      const revealCallback = (entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); // Stop observing once animated
+          }
+        });
+      };
+
+      const revealObserver = new IntersectionObserver(revealCallback, {
+        root: null, // Viewport
+        threshold: 0.15, // Trigger when 15% is visible
+        rootMargin: '0px 0px -50px 0px' // Offset trigger point slightly
+      });
+
+      animateElements.forEach(el => revealObserver.observe(el));
+
+      // 6. Dynamic Card Heights (Align Enterprise and Student cards to maximum height on desktop)
+      const adjustCardHeights = () => {
+        const descBoxes = document.querySelectorAll('.desc-box');
+        
+        // Reset to auto first to accurately measure natural content height
+        descBoxes.forEach(box => {
+          box.style.height = 'auto';
+        });
+
+        // Only synchronize heights on desktop screens
+        if (window.innerWidth > 900) {
+          let maxHeight = 0;
+          descBoxes.forEach(box => {
+            const height = box.offsetHeight;
+            if (height > maxHeight) {
+              maxHeight = height;
+            }
+          });
+          descBoxes.forEach(box => {
+            box.style.height = `${maxHeight}px`;
+          });
+        }
+      };
+
+      // Run immediately and on resize
+      adjustCardHeights();
+      window.addEventListener('resize', adjustCardHeights);
+    });
+  </script>
+</body>
+</html>
